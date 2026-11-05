@@ -1,0 +1,164 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>FSSE Verification Checklist</title>
+<style>
+  @page { size: Letter; margin: 14mm 16mm; }
+  * { box-sizing: border-box; }
+  body {
+    font-family: "Segoe UI", Calibri, Arial, sans-serif;
+    font-size: 10.5pt; line-height: 1.35; color: #1a1a1a;
+    margin: 0;
+  }
+  header { border-bottom: 3px solid #1565c0; padding-bottom: 6pt; margin-bottom: 10pt; }
+  h1 { font-size: 16pt; margin: 0 0 2pt; color: #0d3c78; }
+  .sub { font-size: 9pt; color: #555; }
+  .howto {
+    background: #eef4fb; border: 1px solid #b9d0ea; border-radius: 4pt;
+    padding: 6pt 8pt; font-size: 9.5pt; margin-bottom: 10pt;
+  }
+  section { margin-bottom: 9pt; break-inside: avoid; }
+  h2 {
+    font-size: 11.5pt; margin: 0 0 4pt; color: #0d3c78;
+    border-left: 4px solid #1565c0; padding-left: 6pt;
+  }
+  .need {
+    font-size: 9.5pt; margin: 0 0 4pt 10pt; color: #333;
+  }
+  .need b { color: #7a4a00; }
+  ul.checks { list-style: none; margin: 0 0 4pt 10pt; padding: 0; }
+  ul.checks li {
+    margin: 0 0 3.5pt; padding-left: 20pt; position: relative;
+    break-inside: avoid;
+  }
+  .cb {
+    position: absolute; left: 0; top: 1pt;
+    width: 11pt; height: 11pt; border: 1.3pt solid #444; border-radius: 2pt;
+    display: inline-block;
+  }
+  code {
+    font-family: Consolas, "Courier New", monospace; font-size: 9pt;
+    background: #f2f2f2; padding: 0 2pt; border-radius: 2pt;
+  }
+  .fail {
+    font-size: 9pt; color: #8a1f1f; margin: 2pt 0 0 10pt;
+  }
+  .tested {
+    margin: 4pt 0 0 10pt; font-size: 9pt; color: #555;
+  }
+  .tested .line {
+    display: inline-block; border-bottom: 1px solid #999;
+    width: 150pt; margin-left: 3pt;
+  }
+  .tested .line.short { width: 70pt; }
+  footer {
+    margin-top: 10pt; border-top: 2px solid #1565c0; padding-top: 5pt;
+    font-size: 9.5pt;
+  }
+  footer .cb { position: static; vertical-align: -2pt; margin-right: 5pt; }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>FamilySearch Search Enhancer — Verification Checklist</h1>
+  <div class="sub">v0.2.12 &nbsp;·&nbsp; 2026-08-31 &nbsp;·&nbsp; each section is independent — any order, any session</div>
+</header>
+
+<div class="howto">
+  <b>Setup for every check:</b> dock DevTools to the <b>bottom</b> (side-docking narrows the page into the
+  third-party-only layout) · filter the console by <code>FSSE</code> · the <code>person ready:</code> line shows
+  everything that was scraped · <b>hover</b> a menu entry to read its tooltip · the search URL appears in the
+  new tab's address bar.
+</div>
+
+<section>
+  <h2>A1 &nbsp;·&nbsp; E&amp;W marriage 1912–2005 — spouse filter ON</h2>
+  <div class="need"><b>Relative needed:</b> married in England/Wales between <b>1912 and 2005</b>, marriage date recorded in the tree (couple block shows &ldquo;Marriage &lt;date&gt;&rdquo;).</div>
+  <ul class="checks">
+    <li><span class="cb"></span>MARRIAGE entry reads <code>E&amp;W GRO Marriage Index 1837–2005 — &lt;year&gt;, spouse &lt;Surname&gt;</code></li>
+    <li><span class="cb"></span>URL has <code>f.collectionId=2285732</code>, <code>q.marriageLikeDate</code> = year&nbsp;±2, <code>q.spouseSurname</code> present, <b>no</b> <code>q.marriageLikePlace</code></li>
+    <li><span class="cb"></span>The actual marriage appears in the results</li>
+  </ul>
+  <div class="tested">Person tested:<span class="line"></span> &nbsp;FSID:<span class="line short"></span></div>
+</section>
+
+<section>
+  <h2>A2 &nbsp;·&nbsp; E&amp;W marriage 1837–1911 — GRO index, spouse filter OFF</h2>
+  <div class="need"><b>Relative needed:</b> married in England/Wales between <b>1837 and 1911</b>, marriage date in the tree. (Charles&rsquo;s 1831 marriage is pre-1837, so this branch has never been seen live.)</div>
+  <ul class="checks">
+    <li><span class="cb"></span>Entry label is <code>E&amp;W GRO Marriage Index 1837–2005 — &lt;year&gt; (&lt;Surname&gt;)</code></li>
+    <li><span class="cb"></span>Tooltip ends: <i>&ldquo;Spouse filter omitted — this index names spouses only from 1912.&rdquo;</i></li>
+    <li><span class="cb"></span>URL has collection <code>2285732</code> but <b>no</b> <code>q.spouseSurname</code></li>
+  </ul>
+  <div class="tested">Person tested:<span class="line"></span> &nbsp;FSID:<span class="line short"></span></div>
+</section>
+
+<section>
+  <h2>B &nbsp;·&nbsp; Woman&rsquo;s surname flips at the real marriage year</h2>
+  <div class="need"><b>Relative needed:</b> a woman with a <b>dated</b> marriage who appears in censuses <b>both before and after</b> that year — ideally one who married <b>before age 20</b> (the old age-heuristic would have gotten her wrong).</div>
+  <ul class="checks">
+    <li><span class="cb"></span>Census entries <b>before</b> the marriage year search <code>q.surname=&lt;maiden&gt;</code> (hover: tooltip names her with the maiden surname)</li>
+    <li><span class="cb"></span>Census entries <b>from</b> the marriage year on search the <b>married</b> surname</li>
+    <li><span class="cb"></span>DEATH entries use the married surname</li>
+    <li><span class="cb"></span><i>Bonus (2+ dated husbands):</i> each census uses the latest marriage ≤ that year; one death entry per married surname; one marriage entry per husband, each at its own year</li>
+  </ul>
+  <div class="tested">Person tested:<span class="line"></span> &nbsp;FSID:<span class="line short"></span></div>
+</section>
+
+<section>
+  <h2>C &nbsp;·&nbsp; Christening / burial proxies</h2>
+  <div class="need"><b>Relative needed:</b> a pre-1837 person with a <b>Burial but no Death</b> vital, and/or a <b>Christening but no Birth</b> vital (common in that era).</div>
+  <ul class="checks">
+    <li><span class="cb"></span><code>person ready:</code> shows <code>deathYear:null</code> with <code>burialYear</code> set (or the birth/christening pair)</li>
+    <li><span class="cb"></span>Tooltips honestly say <i>&ldquo;buried YYYY ±2&rdquo;</i> / <i>&ldquo;christened YYYY ±2&rdquo;</i></li>
+    <li><span class="cb"></span>Census entries are bounded by the proxy years (none after the burial year)</li>
+    <li><span class="cb"></span>Pre-1837 burial → <b>no</b> GRO death entry; <b>Find A Grave only</b></li>
+  </ul>
+  <div class="tested">Person tested:<span class="line"></span> &nbsp;FSID:<span class="line short"></span></div>
+</section>
+
+<section>
+  <h2>D &nbsp;·&nbsp; Remaining ⏳ collection ids (one click each)</h2>
+  <div class="need"><b>Relatives needed:</b> one born/christened in <b>Scotland 1564–1950</b>, one born in <b>Ireland 1620–1881</b>, one born in the <b>US 1867–1931</b>.</div>
+  <ul class="checks">
+    <li><span class="cb"></span><b>Scotland:</b> &ldquo;Scotland births &amp; baptisms 1564–1950&rdquo; opens collection <code>1771030</code>; results are sensible Scottish baptisms and the results page shows the collection filter chip &nbsp;<b>✓ verified 2026-08-31</b></li>
+    <li><span class="cb"></span><b>Scotland bonus:</b> censuses 1841–1901 offered; <b>1911</b> falls back to a generic in-country search (no single FS collection)</li>
+    <li><span class="cb"></span><b>Ireland:</b> collection <code>1584963</code> — sensible results</li>
+    <li><span class="cb"></span><b>Ireland bonus:</b> only the <b>1901 and 1911</b> censuses are offered (the rest were destroyed)</li>
+    <li><span class="cb"></span><b>US:</b> &ldquo;US births &amp; christenings 1867–1931&rdquo; opens collection <code>1808995</code> — the chip names the collection (zero results can be legitimate: only ~37k records)</li>
+  </ul>
+  <div class="fail"><b>Fail signal:</b> an error page, a chip reading &ldquo;Other, &lt;id&gt;&rdquo; instead of the collection name, or the filter silently ignored. (E&amp;W <code>1473014</code> + Scotland <code>1771030</code>: click-verified 2026-08-31; the dead US id <code>1675234</code> was caught by this very check and fixed to <code>1808995</code>.)</div>
+  <div class="tested">People tested:<span class="line"></span><span class="line"></span></div>
+</section>
+
+<section>
+  <h2>E &nbsp;·&nbsp; US / Canada regional logic</h2>
+  <div class="need"><b>Relatives needed:</b> someone born or died in <b>New York state</b>; if available, someone from <b>Alberta / Saskatchewan / Manitoba</b>.</div>
+  <ul class="checks">
+    <li><span class="cb"></span><b>NY:</b> state censuses <code>1855 / 1865 / 1875 / 1892 / 1905 / 1915 / 1925</code> interleaved with the federal ones</li>
+    <li><span class="cb"></span><b>NY:</b> <b>1890 never offered</b> (destroyed census)</li>
+    <li><span class="cb"></span><b>NY:</b> DEATH group = <b>Find A Grave only</b> (no US civil index)</li>
+    <li><span class="cb"></span><b>Prairie Canada:</b> <code>1906 / 1916 / 1926</code> censuses offered</li>
+  </ul>
+  <div class="tested">Person tested:<span class="line"></span> &nbsp;FSID:<span class="line short"></span></div>
+</section>
+
+<section>
+  <h2>F &nbsp;·&nbsp; Quick behavior checks (any person, ~30 s each)</h2>
+  <ul class="checks">
+    <li><span class="cb"></span>Open the Records menu <b>immediately</b> after page load, before the Family section renders → the list grows in place (marriage entries appear) without closing</li>
+    <li><span class="cb"></span>Navigate person → person via a family link → old rows/menu vanish; the new person&rsquo;s menu is correct; Shift+click cycle resets</li>
+    <li><span class="cb"></span><b>Living</b> person → no DEATH group</li>
+    <li><span class="cb"></span>Person who <b>died under 16</b> → no MARRIAGE group</li>
+    <li><span class="cb"></span><b>Australia / NZ</b> person → no census entries (marriage/death fallbacks only)</li>
+  </ul>
+</section>
+
+<footer>
+  <span class="cb"></span><b>All green?</b> Tell Claude &ldquo;release pass&rdquo; → <code>FSSE.DEBUG = false</code>, version bump, rebuild the distributable zip.
+</footer>
+
+</body>
+</html>

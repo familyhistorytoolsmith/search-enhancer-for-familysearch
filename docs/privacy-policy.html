@@ -1,0 +1,98 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Privacy Policy — Search Enhancer for FamilySearch</title>
+<meta name="description" content="Privacy policy for the Search Enhancer for FamilySearch Chrome extension: what it reads, what it stores on your device, and the only things that ever leave your browser.">
+<style>
+  :root { --bg: #ffffff; --ink: #1b1b1b; --muted: #5a6270; --rule: #d6dde6; --accent: #1f3a5f; --band: #eef3f8; }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) { --bg: #14181d; --ink: #e8ecf1; --muted: #9aa5b3; --rule: #2d3640; --accent: #9cc0ea; --band: #1c232b; }
+  }
+  :root[data-theme="dark"] { --bg: #14181d; --ink: #e8ecf1; --muted: #9aa5b3; --rule: #2d3640; --accent: #9cc0ea; --band: #1c232b; }
+  html { background: var(--bg); }
+  body { margin: 0; padding: 0 16px 48px; background: var(--bg); color: var(--ink); font: 16px/1.55 system-ui, "Segoe UI", Roboto, sans-serif; }
+  main { max-width: 44rem; margin: 0 auto; }
+  h1 { font-size: 1.7rem; line-height: 1.25; color: var(--accent); margin: 40px 0 4px; }
+  h2 { font-size: 1.15rem; color: var(--accent); margin: 32px 0 8px; padding-top: 12px; border-top: 1px solid var(--rule); }
+  p, li { margin: 8px 0; }
+  ul { padding-left: 1.3rem; }
+  .meta { color: var(--muted); font-size: 0.95rem; margin-bottom: 20px; }
+  .note { background: var(--band); border-left: 4px solid var(--accent); padding: 10px 14px; margin: 16px 0; }
+  table { border-collapse: collapse; width: 100%; margin: 10px 0; font-size: 0.95rem; }
+  th, td { text-align: left; vertical-align: top; padding: 6px 8px; border-bottom: 1px solid var(--rule); }
+  th { color: var(--accent); }
+  code { font-size: 0.92em; }
+  footer { margin-top: 40px; color: var(--muted); font-size: 0.9rem; border-top: 1px solid var(--rule); padding-top: 12px; }
+</style>
+</head>
+<body>
+<main>
+<h1>Privacy Policy — Search Enhancer for FamilySearch</h1>
+<p class="meta">Chrome extension, version 1.0.0 and later · last updated 4 November 2026</p>
+
+<div class="note">
+<p><strong>In one paragraph.</strong> The extension runs entirely inside your own browser. It reads the FamilySearch page you are looking at and adds search links and research aids to it. It has no server, no account, no analytics and no telemetry, and it collects nothing about you. The only things that ever leave your browser happen when <em>you click</em>: the search you open on the site you chose, the place name sent to a free map geocoder when you click a map link, and the Google map shown on the map page. It stores a few things on your own device, listed below, and nothing anywhere else.</p>
+</div>
+
+<h2>What the extension does</h2>
+<p>Search Enhancer for FamilySearch adds pre-filled record searches to the person pages of FamilySearch Family Tree: extra entries in the page's own "Search Records" list (FamilySearch collections, Ancestry, MyHeritage, Findmypast, FreeBMD, the GRO index, ScotlandsPeople, RootsIreland, IrishGenealogy and newspaper archives), small map links after the places a page shows, the number behind the Quality Score badge, and four links in the Temple menu for signed-in church members. A settings page lets you switch every one of these off.</p>
+
+<h2>What it reads</h2>
+<ul>
+  <li><strong>The FamilySearch page you are viewing</strong> — a person page, its Sources tab, or the Source Linker — after you have signed in to FamilySearch yourself. It reads the name, sex, dates and places shown there, the spouses, parents and marriages, the titles of the sources attached to that person, and the Quality Score the page itself fetched to draw its badge. It never signs in for you and never reads any other tab.</li>
+  <li><strong>The search form of FreeBMD, GRO or ScotlandsPeople</strong> — only on a page that one of the extension's own search entries opened, only to fill that form with the search you just launched and press its Search button. On those sites it reads nothing else and does nothing when you browse them yourself.</li>
+</ul>
+
+<h2>What leaves your browser, and when</h2>
+<p>Nothing is sent anywhere on its own. Three things happen only when you click:</p>
+<table>
+  <tr><th>When you click…</th><th>What is sent</th><th>To whom</th></tr>
+  <tr><td>a search entry</td><td>The person's name, years and places from the tree, as the parameters of that site's search URL — exactly what you would type into the site's own search form.</td><td>The site you chose (FamilySearch, Ancestry, MyHeritage, Findmypast, FreeBMD, GRO, ScotlandsPeople, RootsIreland, IrishGenealogy, or a newspaper archive). That site's own privacy policy then applies.</td></tr>
+  <tr><td>a 📍 map link</td><td>The place name (or two place names) as written on the page, to find its coordinates.</td><td>OpenStreetMap's Nominatim geocoder, a free service of the OpenStreetMap Foundation (<a href="https://osmfoundation.org/wiki/Privacy_Policy">its privacy policy</a>). Results are kept for the browser session so the same place is not looked up twice.</td></tr>
+  <tr><td>a 📍 compare link (two places)</td><td>The two coordinates found above, to draw the map.</td><td>Google Maps, embedded on the extension's own map page (<a href="https://policies.google.com/privacy">Google's privacy policy</a>). If you enter an optional Google Maps API key of your own, that key is sent with the map request.</td></tr>
+</table>
+<p>The extension makes no other request. It does not phone home, has no update channel of its own (Chrome updates it from the Chrome Web Store), and contains no advertising, analytics, crash reporting or tracking of any kind.</p>
+
+<h2>What it stores on your device</h2>
+<table>
+  <tr><th>What</th><th>Where</th><th>Why</th></tr>
+  <tr><td>Your settings (which features are on; your regional Ancestry / Findmypast site)</td><td><code>chrome.storage.sync</code> — Chrome may carry these to your other signed-in Chrome profiles, as it does for any extension's settings</td><td>So the extension behaves the way you set it</td></tr>
+  <tr><td>For each person whose Sources tab you opened: the person's FamilySearch ID and the titles of the sources attached to them (at most 200 people; the oldest are dropped first)</td><td><code>chrome.storage.local</code>, on this device only</td><td>So searches whose collection is already attached can be marked ✓</td></tr>
+  <tr><td>An optional Google Maps API key, only if you enter one on the map page</td><td><code>chrome.storage.local</code></td><td>To draw the map with your own key instead of the keyless embed</td></tr>
+  <tr><td>Which FamilySearch Labs experiments are on for your account, as the FamilySearch page last reported it (a short list of experiment ids)</td><td><code>chrome.storage.local</code>, on this device only</td><td>So the Temple menu's "Families with Remaining Ordinances" row knows whether to open the experiment or first offer to turn it on through FamilySearch's own Labs page</td></tr>
+  <tr><td>Coordinates of places looked up during this browser session</td><td><code>sessionStorage</code> of the FamilySearch tab — gone when the tab closes</td><td>So a place is not sent to the geocoder twice</td></tr>
+  <tr><td>The Quality Score numbers the page itself fetched</td><td>Memory only, while the page is open</td><td>To show the number behind the badge</td></tr>
+</table>
+<p>Removing the extension deletes all of this (Chrome removes an uninstalled extension's storage). The extension never writes to your FamilySearch tree or to any other site.</p>
+
+<h2>Personal data</h2>
+<ul>
+  <li><strong>About you:</strong> none is collected, stored or transmitted. The extension does not know who you are.</li>
+  <li><strong>About the people in the tree:</strong> what the extension reads belongs to FamilySearch Family Tree, which you view under your own FamilySearch account and FamilySearch's terms. Family Tree shows living people only to the account that entered them; the extension treats a person marked Living like any other except that it offers no death searches. Tree data stays in your browser except as part of a search you launch.</li>
+  <li><strong>Sale or sharing:</strong> never. There is nothing to sell and no one to share it with.</li>
+  <li><strong>Children:</strong> the extension is not directed at children and collects no data from anyone.</li>
+</ul>
+
+<h2>Permissions, in plain words</h2>
+<ul>
+  <li><strong>Storage</strong> — for the settings, the per-person source titles and the list of Labs experiments listed above.</li>
+  <li><strong>Access to www.familysearch.org</strong> — to read the person page you are viewing and add its rows there.</li>
+  <li><strong>Access to www.freebmd.org.uk, www.gro.gov.uk and www.scotlandspeople.gov.uk</strong> — these sites have no search links, so when you click one of the extension's search entries a small script on that site fills its own search form and presses Search. It runs only for a search launched from FamilySearch.</li>
+</ul>
+<p>No other permission is requested. The extension's code is not minified or obfuscated and loads no code from anywhere else.</p>
+
+<h2>Changes to this policy</h2>
+<p>If the extension ever changes what it reads, stores or sends, this page will be updated and the version number at the top raised before that version is published. The Chrome Web Store listing links to this page.</p>
+
+<h2>Contact</h2>
+<p>Questions about this policy or the extension: <strong>familyhistorytoolsmith@gmail.com</strong> (Family History Toolsmith, the extension's publisher).</p>
+<p>The extension's <a href="./">help page</a> explains how to install and use it; its source code is public at <a href="https://github.com/familyhistorytoolsmith/search-enhancer-for-familysearch">GitHub</a>.</p>
+
+<footer>
+<p><strong>Unofficial.</strong> Search Enhancer for FamilySearch is not affiliated with, endorsed by, sponsored by or supported by FamilySearch International. FamilySearch is a trademark of FamilySearch/Intellectual Reserve, Inc., and may be registered in the United States of America and other countries. Ancestry, MyHeritage, Findmypast, FreeBMD, ScotlandsPeople, RootsIreland, Google and OpenStreetMap are trademarks of their respective owners; the extension only opens their public search pages.</p>
+</footer>
+</main>
+</body>
+</html>

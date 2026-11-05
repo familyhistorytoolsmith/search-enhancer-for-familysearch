@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Search Enhancer for FamilySearch — settings</title>
+<style>
+  :root { color-scheme: light; }
+  html, body { margin: 0; }
+  body { min-width: 340px; max-width: 460px; margin: 0 auto; padding: 0 0 12px; font: 13px/1.4 system-ui, "Segoe UI", Roboto, Arial, sans-serif; color: #1f2933; background: #fff; }
+  header { display: flex; align-items: center; gap: 10px; padding: 12px 16px 10px; border-bottom: 1px solid #d9dee3; background: #f7f8f9; }
+  header img { width: 32px; height: 32px; flex: none; }
+  header h1 { margin: 0; font-size: 15px; font-weight: 600; line-height: 1.2; }
+  header .sub { margin: 2px 0 0; color: #5b6b7a; font-size: 12px; }
+  header .ver { margin-left: auto; color: #7a8794; font-size: 12px; white-space: nowrap; }
+  section { padding: 10px 16px 4px; border-bottom: 1px solid #eef1f4; }
+  section:last-of-type { border-bottom: 0; }
+  h2 { margin: 0 0 4px; font-size: 11.5px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; color: #5b6b7a; }
+  .intro { margin: 0 0 6px; color: #5b6b7a; font-size: 12px; }
+  .grid { display: grid; grid-template-columns: 1fr; gap: 2px 14px; }
+  .grid.cols2 { grid-template-columns: 1fr 1fr; }
+  label.opt { display: flex; align-items: flex-start; gap: 8px; padding: 3px 0; cursor: pointer; }
+  label.opt input { margin: 2px 0 0; flex: none; }
+  label.opt .text { min-width: 0; }
+  label.opt .text small { display: block; color: #7a8794; font-size: 11.5px; line-height: 1.3; }
+  .grid.cols2 label.opt .text small { display: none; } /* two-column groups keep the hint in the tooltip */
+  .sel { display: grid; grid-template-columns: auto 1fr; align-items: center; gap: 6px 10px; padding: 3px 0; }
+  .sel select { font: inherit; padding: 3px 4px; max-width: 100%; }
+  .sel small { grid-column: 2; color: #7a8794; font-size: 11.5px; }
+  footer button { font: inherit; padding: 4px 10px; cursor: pointer; }
+  footer { display: flex; align-items: center; gap: 12px; padding: 10px 16px 0; color: #5b6b7a; font-size: 12px; }
+  footer .status { margin-left: auto; color: #1a7f37; font-weight: 500; min-width: 4em; text-align: right; }
+  footer .status.off { visibility: hidden; }
+  .nostore { margin: 10px 16px 0; padding: 8px 10px; background: #fff4e5; border: 1px solid #f0c674; border-radius: 4px; font-size: 12px; }
+</style>
+</head>
+<body>
+<header>
+  <img src="../icons/icon32.png" alt="">
+  <div>
+    <h1>Search Enhancer for FamilySearch</h1>
+    <p class="sub">Unofficial · not affiliated with FamilySearch</p>
+  </div>
+  <span class="ver" id="ver"></span>
+</header>
+<div id="nostore" class="nostore" hidden>Settings cannot be saved here: the browser's extension storage is unavailable. The defaults are in force.</div>
+<main id="groups"></main>
+<footer>
+  <button id="reset" type="button">Restore defaults</button>
+  <span>Changes apply at once; open FamilySearch tabs follow within a second.</span>
+  <span class="status off" id="status">Saved ✓</span>
+</footer>
+<script src="settings.js"></script>
+<script src="options.js"></script>
+</body>
+</html>

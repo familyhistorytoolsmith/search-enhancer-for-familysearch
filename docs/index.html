@@ -1,0 +1,133 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Search Enhancer for FamilySearch</title>
+<meta name="description" content="An unofficial Chrome extension that adds pre-filled record searches and research aids to FamilySearch Family Tree person pages: how to install it, what it adds, settings, privacy.">
+<style>
+  :root { --bg: #ffffff; --ink: #1b1b1b; --muted: #5a6270; --rule: #d6dde6; --accent: #1f3a5f; --band: #eef3f8; --button: #1f3a5f; --button-ink: #ffffff; }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) { --bg: #14181d; --ink: #e8ecf1; --muted: #9aa5b3; --rule: #2d3640; --accent: #9cc0ea; --band: #1c232b; --button: #9cc0ea; --button-ink: #14181d; }
+  }
+  :root[data-theme="dark"] { --bg: #14181d; --ink: #e8ecf1; --muted: #9aa5b3; --rule: #2d3640; --accent: #9cc0ea; --band: #1c232b; --button: #9cc0ea; --button-ink: #14181d; }
+  html { background: var(--bg); }
+  body { margin: 0; padding: 0 16px 48px; background: var(--bg); color: var(--ink); font: 16px/1.55 system-ui, "Segoe UI", Roboto, sans-serif; }
+  main { max-width: 44rem; margin: 0 auto; }
+  header { display: flex; align-items: center; gap: 16px; margin: 40px 0 8px; }
+  header img { width: 64px; height: 64px; flex: none; }
+  h1 { font-size: 1.7rem; line-height: 1.25; color: var(--accent); margin: 0; }
+  h2 { font-size: 1.2rem; color: var(--accent); margin: 36px 0 8px; padding-top: 14px; border-top: 1px solid var(--rule); }
+  h3 { font-size: 1.02rem; color: var(--accent); margin: 22px 0 6px; }
+  p, li { margin: 8px 0; }
+  ul, ol { padding-left: 1.4rem; }
+  ol li { margin: 10px 0; }
+  a { color: var(--accent); }
+  .tagline { color: var(--muted); margin: 0 0 18px; }
+  .note { background: var(--band); border-left: 4px solid var(--accent); padding: 10px 14px; margin: 16px 0; }
+  .links { display: flex; flex-wrap: wrap; gap: 8px 18px; margin: 0 0 8px; font-size: 0.97rem; }
+  .button { display: inline-block; background: var(--button); color: var(--button-ink); text-decoration: none; font-weight: 600; padding: 10px 18px; border-radius: 8px; margin: 6px 0 4px; }
+  .button:hover { filter: brightness(1.08); }
+  .small { color: var(--muted); font-size: 0.93rem; }
+  code { font-size: 0.92em; background: var(--band); padding: 1px 5px; border-radius: 4px; }
+  kbd { font: inherit; font-weight: 600; }
+  table { border-collapse: collapse; width: 100%; margin: 10px 0; font-size: 0.95rem; }
+  th, td { text-align: left; vertical-align: top; padding: 6px 8px; border-bottom: 1px solid var(--rule); }
+  th { color: var(--accent); }
+  footer { margin-top: 44px; color: var(--muted); font-size: 0.9rem; border-top: 1px solid var(--rule); padding-top: 12px; }
+</style>
+</head>
+<body>
+<main>
+
+<header>
+  <img src="icon128.png" alt="" width="64" height="64">
+  <div>
+    <h1>Search Enhancer for FamilySearch</h1>
+    <p class="tagline">A Chrome extension that adds pre-filled record searches and research aids to FamilySearch Family Tree person pages.</p>
+  </div>
+</header>
+
+<p class="links">
+  <a href="#install">Install</a>
+  <a href="#what-it-adds">What it adds</a>
+  <a href="#settings">Settings</a>
+  <a href="feature-guide.pdf">Feature guide (PDF)</a>
+  <a href="privacy-policy.html">Privacy policy</a>
+  <a href="https://github.com/familyhistorytoolsmith/search-enhancer-for-familysearch">Source code</a>
+</p>
+
+<div class="note">
+<p><strong>Unofficial.</strong> This extension is not affiliated with, endorsed by, sponsored by or supported by FamilySearch International. It runs entirely in your own browser: it reads the person page you are already viewing and builds links to the search pages of FamilySearch and other genealogy sites. Nothing is collected, no account is involved, nothing is sold.</p>
+</div>
+
+<h2 id="install">Install</h2>
+
+<h3>From the Chrome Web Store</h3>
+<p>The store listing is under review. When it is approved, this section becomes a single <strong>Add to Chrome</strong> link, and that is the way to install from then on.</p>
+
+<h3 id="install-now">Install now, before the Chrome Web Store</h3>
+<p>Until the listing is live you can load the same build by hand. It takes about two minutes and needs no technical knowledge, but it does ask you to keep one folder on your computer.</p>
+<p><a class="button" href="https://github.com/familyhistorytoolsmith/search-enhancer-for-familysearch/releases/latest">Download the latest release</a><br>
+<span class="small">On the page that opens, look under <strong>Assets</strong> and click the file named <code>search-enhancer-for-familysearch-v…zip</code>.</span></p>
+<ol>
+  <li><strong>Extract the zip to a folder you will keep.</strong> Not your Downloads folder: Chrome loads the extension from this folder every time it starts, so the folder has to stay where it is. On Windows, right-click the zip and choose <em>Extract All…</em>; it makes a folder named after the zip. A good home is <code>Documents\Search Enhancer</code>.</li>
+  <li><strong>Open Chrome's extensions page.</strong> Type <code>chrome://extensions</code> into the address bar and press Enter.</li>
+  <li><strong>Switch on Developer mode</strong> with the toggle at the top right of that page.</li>
+  <li><strong>Click Load unpacked</strong> (top left) and choose the folder you extracted, the one that contains <code>manifest.json</code>. The extension's card appears, named <em>Search Enhancer for FamilySearch</em>.</li>
+  <li><strong>Sign in to FamilySearch</strong> and open any person in Family Tree. The extra rows appear in the page's <strong>Search Records</strong> panel once the person's details have loaded.</li>
+  <li><strong>Optional: pin the icon.</strong> Chrome parks a new extension's toolbar icon behind the puzzle-piece menu; click that menu and the pin beside the extension to keep it visible. The icon opens the <a href="#settings">settings page</a>.</li>
+</ol>
+
+<h3>Updating a hand-loaded copy</h3>
+<p>A copy loaded this way does not update itself. When a new release appears: download the zip, extract it <em>over the same folder</em> (let Windows replace the files), then open <code>chrome://extensions</code> and click the <strong>reload</strong> arrow on the extension's card. Refresh any FamilySearch tab that was already open; a tab left open shows a one-line notice in its console asking for that refresh.</p>
+
+<h3>When the store listing goes live</h3>
+<p><strong>Remove the hand-loaded copy first</strong> (<code>chrome://extensions</code> → <em>Remove</em> on its card), then install from the store. To Chrome the store copy is a different extension: its settings start over (a minute's work on the settings page), and two copies running side by side would both add rows and fight over FamilySearch's own ones.</p>
+
+<p class="small">Good to know: some Chrome versions show a "Disable developer mode extensions" bubble at start-up — choose <em>Cancel</em> and it keeps working. A Chrome managed by a workplace or school may lock Developer mode; the store route is the one for those. Microsoft Edge loads unpacked extensions the same way (<code>edge://extensions</code>), but the extension has only been tested in Chrome.</p>
+
+<h2 id="what-it-adds">What it adds</h2>
+<p>Open a person in Family Tree and the page's own <strong>Search Records</strong> list gains expandable menus. Each entry opens a search on the chosen site with the person's name, years, places, spouse and parents already filled in, built from the page you are looking at and nothing else. Hover any entry to see exactly what a click will send.</p>
+<ul>
+  <li><strong>FamilySearch ▸</strong> — every FamilySearch collection search that fits the person: censuses, birth, marriage and death indexes, passenger lists, military records, Full-Text Search, all collections. Searches whose collection is already attached to the person are ticked.</li>
+  <li><strong>Ancestry ▸, MyHeritage ▸, Findmypast ▸</strong> — the site's own search for the person first, exactly as FamilySearch's standard row runs it, then searches scoped to the countries the person lived in, the censuses, civil and parish records, and member trees.</li>
+  <li><strong>FreeBMD ▸ and GRO Index ▸</strong> — the England &amp; Wales civil birth, marriage and death indexes, free; the site's search form is filled and submitted for you.</li>
+  <li><strong>ScotlandsPeople ▸</strong> — statutory registers, Old Parish Registers and the 1841–1921 censuses, the form filled for you.</li>
+  <li><strong>RootsIreland ▸ and IrishGenealogy ▸</strong> — the Irish county genealogy centres' transcripts and Ireland's free official civil and church registers.</li>
+  <li><strong>Newspapers ▸</strong> — Newspapers.com, OldNews, GenealogyBank, Chronicling America, Findmypast's British &amp; Irish newspapers, Trove and Papers Past, offered by the countries the person's events touch.</li>
+</ul>
+<p>The lists are content-aware: a search is offered only when its collection covers the person's years and places. A woman is searched under her maiden name before her marriage and each married name after it. A person with no death date gets searches of the years they could have died.</p>
+<p>Beyond the Search Records list:</p>
+<ul>
+  <li>a small <strong>📍 map</strong> link after every place on the person page, the Sources tab and the Source Linker; on the linker, the record's place and the tree's place are compared on one map with the distance between them;</li>
+  <li>hover the <strong>Data Quality Score</strong> badge for the number behind Low / Medium / High, the thresholds, and the changes that would raise it;</li>
+  <li>for signed-in members of The Church of Jesus Christ of Latter-day Saints, four links in the <strong>Temple</strong> menu; the fourth opens the FamilySearch Labs experiment <em>Families with Remaining Ordinances</em> and, while that experiment is off, first offers to turn it on through FamilySearch's own Labs page.</li>
+</ul>
+<p>The <a href="feature-guide.pdf">feature guide</a> (PDF, a few pages) walks through every menu with examples; it is written for genealogists, not programmers.</p>
+
+<h2 id="settings">Settings</h2>
+<p>Click the extension's toolbar icon (or open <code>chrome://extensions</code> → <em>Details</em> → <em>Extension options</em>). Every feature has its own switch: each search menu, the map pins per kind of page, the Quality Score tooltip, each Temple link. Switch a menu off and FamilySearch's own row for that site comes back, the thing to do when you have no account with a site and only want its standard search. Two drop-downs point the Ancestry and Findmypast links at your own regional site (ancestry.co.uk, findmypast.com.au and so on). Changes apply at once; open FamilySearch tabs follow within a second.</p>
+
+<h2 id="accounts">Accounts and costs</h2>
+<table>
+  <tr><th>Free, no login</th><td>FreeBMD, IrishGenealogy, Chronicling America, Trove, Papers Past; FamilySearch itself (a free account)</td></tr>
+  <tr><th>Free account</th><td>GRO (the index), ScotlandsPeople (index results; images cost credits)</td></tr>
+  <tr><th>Subscription to view records</th><td>Ancestry, MyHeritage, Findmypast, Newspapers.com, GenealogyBank, RootsIreland (its counts are free)</td></tr>
+</table>
+<p>The searches are suggestions: attaching a record is still your decision on the results page. The extension never changes anything in your tree.</p>
+
+<h2 id="privacy">Privacy</h2>
+<p>The extension has no server, no account, no analytics and no telemetry. It sends nothing anywhere except on your click: the search you open on the site you chose, the place name sent to OpenStreetMap's geocoder when you click a map link, and Google's embedded map on the map page. It stores your settings and a small per-person cache on your own device, and nothing anywhere else. The <a href="privacy-policy.html">privacy policy</a> lists every item.</p>
+
+<h2 id="help">Help and feedback</h2>
+<p>Something not working, or a search you would like to see added? Open an issue on <a href="https://github.com/familyhistorytoolsmith/search-enhancer-for-familysearch/issues">GitHub</a> or write to <strong>familyhistorytoolsmith@gmail.com</strong>. For a problem on a particular person page, say which person (a FamilySearch ID is enough, for a deceased person) and what you expected to see. The settings page has a <em>Console diagnostics</em> switch whose output helps with trickier reports.</p>
+
+<footer>
+<p><strong>Unofficial.</strong> Search Enhancer for FamilySearch is not affiliated with, endorsed by, sponsored by or supported by FamilySearch International. FamilySearch is a trademark of FamilySearch/Intellectual Reserve, Inc., and may be registered in the United States of America and other countries. Ancestry, MyHeritage, Findmypast, FreeBMD, ScotlandsPeople, RootsIreland, Google and OpenStreetMap are trademarks of their respective owners; the extension only opens their public search pages.</p>
+<p>Published by Family History Toolsmith · open source under the <a href="https://github.com/familyhistorytoolsmith/search-enhancer-for-familysearch/blob/main/LICENSE">MIT License</a>.</p>
+</footer>
+
+</main>
+</body>
+</html>

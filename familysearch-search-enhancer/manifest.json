@@ -1,0 +1,74 @@
+{
+  "manifest_version": 3,
+  "name": "Search Enhancer for FamilySearch",
+  "version": "1.0.3",
+  "minimum_chrome_version": "111",
+  "description": "Unofficial. Pre-filled record searches (Ancestry, MyHeritage, Findmypast, FreeBMD, GRO and more) on FamilySearch person pages.",
+  "homepage_url": "https://familyhistorytoolsmith.github.io/search-enhancer-for-familysearch/",
+  "icons": {
+    "16": "icons/icon16.png",
+    "32": "icons/icon32.png",
+    "48": "icons/icon48.png",
+    "128": "icons/icon128.png"
+  },
+  "permissions": ["storage"],
+  "action": {
+    "default_popup": "src/options.html",
+    "default_title": "Search Enhancer for FamilySearch — settings",
+    "default_icon": {
+      "16": "icons/icon16.png",
+      "32": "icons/icon32.png",
+      "48": "icons/icon48.png",
+      "128": "icons/icon128.png"
+    }
+  },
+  "options_ui": {
+    "page": "src/options.html",
+    "open_in_tab": true
+  },
+  "content_scripts": [
+    {
+      "matches": ["https://www.familysearch.org/*"],
+      "js": ["src/dqs-listen.js"],
+      "run_at": "document_start",
+      "world": "MAIN"
+    },
+    {
+      "matches": ["https://www.familysearch.org/*"],
+      "js": [
+        "src/inject.js",
+        "src/settings.js",
+        "src/labs.js",
+        "src/familysearch.js",
+        "src/sources.js",
+        "src/fs-collections.js",
+        "src/sites.js",
+        "src/linker.js",
+        "src/dqs.js",
+        "src/content.js"
+      ],
+      "run_at": "document_idle"
+    },
+    {
+      "matches": ["https://www.freebmd.org.uk/*"],
+      "js": ["src/freebmd-fill.js"],
+      "run_at": "document_idle"
+    },
+    {
+      "matches": ["https://www.gro.gov.uk/*"],
+      "js": ["src/gro-fill.js"],
+      "run_at": "document_idle"
+    },
+    {
+      "matches": ["https://www.scotlandspeople.gov.uk/*"],
+      "js": ["src/sp-fill.js"],
+      "run_at": "document_idle"
+    }
+  ],
+  "web_accessible_resources": [
+    {
+      "resources": ["icons/*", "src/map.html"],
+      "matches": ["https://www.familysearch.org/*"]
+    }
+  ]
+}

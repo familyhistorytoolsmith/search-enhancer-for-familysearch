@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Two places</title>
+<style>
+  :root { color-scheme: light; }
+  html, body { height: 100%; margin: 0; }
+  body { display: flex; flex-direction: column; font: 15px/1.35 system-ui, Segoe UI, Roboto, sans-serif; color: #1f2933; background: #f7f8f9; }
+  #hdr { padding: 10px 16px; border-bottom: 1px solid #d9dee3; background: #fff; }
+  .places { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+  .place { display: flex; flex-direction: column; min-width: 0; }
+  .place b { font-weight: 600; }
+  .place small { color: #5b6b7a; }
+  .dist { margin: 0 8px; padding: 4px 10px; border-radius: 14px; background: #eef3f8; font-weight: 600; white-space: nowrap; }
+  .dist small { font-weight: 400; color: #5b6b7a; }
+  .pin { display: inline-flex; align-items: center; justify-content: center; width: 24px; height: 24px; border-radius: 50%; color: #fff; font-weight: 700; font-size: 13px; flex: none; }
+  .pin.a { background: #1a73e8; }
+  .pin.b { background: #d93025; }
+  .links { margin-top: 6px; display: flex; gap: 16px; flex-wrap: wrap; align-items: baseline; }
+  .links a { color: #0b6e95; text-decoration: none; font-weight: 500; }
+  .links a:hover { text-decoration: underline; }
+  .links a.muted { color: #7a8794; font-weight: 400; font-size: 13px; margin-left: auto; }
+  .err { color: #a33; }
+  #setup { padding: 10px 16px; border-bottom: 1px solid #d9dee3; background: #fffbe6; font-size: 14px; }
+  #setup p { margin: 0 0 8px; }
+  #setup input { width: min(420px, 100%); padding: 6px 8px; font: inherit; }
+  #setup button { margin-left: 6px; padding: 6px 12px; font: inherit; cursor: pointer; }
+  #frame { position: relative; flex: 1; min-height: 0; background: #e5e9ed; }
+  #gmap { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; }
+  #mode { position: absolute; left: 0; bottom: 0; padding: 2px 8px; font-size: 11px; color: #5b6b7a; background: rgba(255,255,255,.85); }
+</style>
+</head>
+<body>
+<header id="hdr"></header>
+<div id="setup" hidden>
+  <p><b>Optional: a Google Maps Embed API key.</b> Without one this page shows Google's embedded directions map (both pins and the route). With your own key it uses the supported Maps Embed API, which also prints the driving distance and time on the map. The Embed API is free with unlimited use: in the <a href="https://console.cloud.google.com/google/maps-apis/credentials" target="_blank" rel="noopener">Google Cloud console</a> create a key, enable the <i>Maps Embed API</i> for it and restrict the key to that API. The key is stored only in this extension.</p>
+  <label for="key">Key</label> <input id="key" type="text" placeholder="AIza…" spellcheck="false" autocomplete="off"><button id="save">Save</button><button id="clear">Use no key</button>
+</div>
+<div id="frame">
+  <iframe id="gmap" title="Both places on Google Maps" allowfullscreen referrerpolicy="no-referrer-when-downgrade" src="about:blank"></iframe>
+  <div id="mode"></div>
+</div>
+<script src="map.js"></script>
+</body>
+</html>

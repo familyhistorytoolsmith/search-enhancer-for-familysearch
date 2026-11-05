@@ -1,0 +1,22 @@
+# Working notes and assistant state — not part of the extension
+CLAUDE.md
+.claude/
+
+# 4K page captures behind the store screenshots (they carry the account owner's own page header)
+store/captures/
+
+# The fillable release checklist and its generator (typed entries and personal choices)
+Search Enhancer for FamilySearch - Release Checklist.pdf
+make-release-checklist.py
+
+# A separate companion app (RootsMagic WebSearch editor) — its own project
+rm-websearch-editor/
+
+# Build output: the store zip goes on a GitHub Release, never into the history
+*.zip
+__pycache__/
+
+# Editor and OS noise
+.vscode/
+Thumbs.db
+.DS_Store
