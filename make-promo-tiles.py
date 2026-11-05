@@ -10,17 +10,24 @@ adds the site list underneath. Nothing of FamilySearch's own artwork is used; th
 redrawn here at tile resolution from the shipped icon128.png's geometry (a 128-px bitmap would
 go soft at marquee size).
 
+The help page (docs/index.html) uses the same two tiles as its banner - the marquee on a wide screen,
+the small tile on a phone. A default run therefore also fills docs/img/ (GitHub Pages serves docs/
+only): a copy of both tiles, plus promo-tile-880x560.png, the small tile at twice the size for the
+dense screens phones have.
+
 Run:  python make-promo-tiles.py            (from the repo root; needs Pillow + Segoe UI fonts)
-      python make-promo-tiles.py <outdir>   (elsewhere, e.g. for a preview)
+      python make-promo-tiles.py <outdir>   (elsewhere, e.g. for a preview; docs/img/ is left alone)
 """
 
 import os
+import shutil
 import sys
 
 from PIL import Image, ImageDraw, ImageFont
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 OUT_DIR = sys.argv[1] if len(sys.argv) > 1 else os.path.join(HERE, "store")
+WEB_DIR = None if len(sys.argv) > 1 else os.path.join(HERE, "docs", "img")   # the help page's copies
 FONT_DIR = os.path.join(os.environ.get("WINDIR", r"C:\Windows"), "Fonts")
 
 # Palette — the Feature Guide's / checklist's house colours plus the icon's blues.
@@ -155,14 +162,27 @@ def make_tile(width, height, icon_px, margin, gap, title_px, tag_px, sites_px, o
     return final
 
 
+SMALL_NAME = "promo-tile-440x280.png"
+MARQUEE_NAME = "marquee-1400x560.png"
+
+
 def main():
     os.makedirs(OUT_DIR, exist_ok=True)
     small = make_tile(440, 280, icon_px=150, margin=34, gap=30, title_px=34, tag_px=16, sites_px=0,
-                      out_path=os.path.join(OUT_DIR, "promo-tile-440x280.png"))
+                      out_path=os.path.join(OUT_DIR, SMALL_NAME))
     marquee = make_tile(1400, 560, icon_px=300, margin=120, gap=84, title_px=78, tag_px=36, sites_px=27,
-                        out_path=os.path.join(OUT_DIR, "marquee-1400x560.png"))
-    for name, im in (("promo-tile-440x280.png", small), ("marquee-1400x560.png", marquee)):
+                        out_path=os.path.join(OUT_DIR, MARQUEE_NAME))
+    for name, im in ((SMALL_NAME, small), (MARQUEE_NAME, marquee)):
         print(f"{name}: {im.size[0]}x{im.size[1]}")
+
+    if WEB_DIR:
+        os.makedirs(WEB_DIR, exist_ok=True)
+        for name in (SMALL_NAME, MARQUEE_NAME):
+            shutil.copyfile(os.path.join(OUT_DIR, name), os.path.join(WEB_DIR, name))
+        # The small tile's measurements, doubled.
+        big = make_tile(880, 560, icon_px=300, margin=68, gap=60, title_px=68, tag_px=32, sites_px=0,
+                        out_path=os.path.join(WEB_DIR, "promo-tile-880x560.png"))
+        print(f"docs/img: both tiles copied, promo-tile-880x560.png: {big.size[0]}x{big.size[1]}")
 
 
 if __name__ == "__main__":

@@ -38,6 +38,7 @@ only the linker table and the map page below the browser's toolbar; no tab strip
 beyond it - and the card crop starts at the card's left border, right of the Vitals card).
 """
 import os
+import shutil
 import sys
 
 from PIL import Image, ImageChops, ImageDraw, ImageFilter, ImageFont
@@ -509,3 +510,9 @@ if __name__ == "__main__":
     paths = sys.argv[2:2 + n]
     out = sys.argv[2 + n] if len(sys.argv) > 2 + n else default_out
     fn(*paths, out)
+    # The help page (docs/index.html) shows the same five images; GitHub Pages serves docs/ only, so
+    # a default run keeps the page's copy in step.
+    web = os.path.join("docs", "img")
+    if out == default_out and os.path.isdir(web):
+        shutil.copyfile(out, os.path.join(web, os.path.basename(out)))
+        print("copied to", web)
