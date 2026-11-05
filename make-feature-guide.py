@@ -4,13 +4,29 @@
 Run from the repo root:  python make-feature-guide.py
 Needs: pip install reportlab   (fonts: Segoe UI, Segoe UI Symbol, Segoe UI Emoji from the Windows Fonts folder)
 Update VERSION below and the text when features change, then re-run.
+
+Pictures: the marquee tile is the banner on page 1 and the five store screenshots sit beside the
+features they show (store/marquee-1400x560.png, store/screenshot-*.png - the files the help page
+shows too). Re-run after make-promo-tiles.py or make-store-screenshots.py changes one of them.
+
+Page layout: a picture and its caption stay together, so one that does not fit in what is left of a
+page moves to the next page and leaves a gap behind. The section order and the two widths (COVER_W,
+FIG_W) are chosen so that no page is left half empty: page 1 = banner, "What it is", picture 1;
+picture 2 follows the Ancestry block; picture 3 closes the page that holds Findmypast, FreeBMD and
+GRO; pictures 4 and 5 open the pages after their text. After a text change, look at the pages again
+(8 pages as of 1.0.4) - if a gap opens, narrow FIG_W a little or move a block.
+
+The PDF is about 2.5 MB with the pictures, and every run stamps a new creation date, so re-run only
+when something changed - an unchanged re-run still shows up in git as a new 2.5 MB file.
 """
-import os, sys
+import io, os, sys
+from PIL import Image as PILImage
 from reportlab.lib.pagesizes import letter
 from reportlab.lib.units import inch
 from reportlab.lib import colors
 from reportlab.lib.styles import ParagraphStyle
-from reportlab.lib.enums import TA_LEFT
+from reportlab.lib.enums import TA_LEFT, TA_CENTER
+from reportlab.lib.utils import ImageReader
 from reportlab.platypus import (SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle,
                                 Image, KeepTogether, PageBreak, CondPageBreak)
 from reportlab.pdfbase import pdfmetrics
@@ -20,6 +36,7 @@ from reportlab.pdfgen import canvas
 HERE = os.path.dirname(os.path.abspath(__file__))
 OUT = sys.argv[1] if len(sys.argv) > 1 else os.path.join(HERE, "docs", "feature-guide.pdf")  # served by GitHub Pages
 ICONS = os.path.join(HERE, "familysearch-search-enhancer", "icons")
+PICTURES = os.path.join(HERE, "store")   # the marquee tile and the five store screenshots
 VERSION = "1.0.4"
 
 # ---------- fonts ----------
@@ -60,9 +77,42 @@ b1 = ParagraphStyle("b1", parent=body, leftIndent=14, bulletIndent=3, spaceAfter
 b2 = ParagraphStyle("b2", parent=body, leftIndent=28, bulletIndent=16, spaceAfter=1.2, fontSize=8.9, leading=11.2)
 cell = ParagraphStyle("cell", parent=body, fontSize=8.7, leading=11)
 cellh = ParagraphStyle("cellh", parent=cell, fontName="Seg-B", textColor=NAVY)
+cap = ParagraphStyle("cap", parent=small, alignment=TA_CENTER)
+subc = ParagraphStyle("subc", parent=sub, alignment=TA_CENTER)
 
 def P(t, st=body):
     return Paragraph(t, st)
+
+FIG_W = 6.6 * inch   # the screenshots' width: the widest at which each still fits on the page beside its text
+
+def framed(source, px_w, px_h, width):
+    """An image (a path or an open file) at `width`, its proportions kept, inside a hairline frame."""
+    t = Table([[Image(source, width, width * px_h / float(px_w))]], colWidths=[width])
+    t.setStyle(TableStyle([("BOX", (0, 0), (-1, -1), 0.6, RULE),
+                           ("LEFTPADDING", (0, 0), (-1, -1), 0), ("RIGHTPADDING", (0, 0), (-1, -1), 0),
+                           ("TOPPADDING", (0, 0), (-1, -1), 0), ("BOTTOMPADDING", (0, 0), (-1, -1), 0)]))
+    t.hAlign = "CENTER"
+    return t
+
+def picture(name, width=FIG_W):
+    """A picture from store/ at `width`."""
+    path = os.path.join(PICTURES, name)
+    iw, ih = ImageReader(path).getSize()
+    return framed(path, iw, ih, width)
+
+def banner(name, trim, width=7.1 * inch):
+    """The marquee tile as the page-1 banner, `trim` pixels of its empty margin cut off the top and the
+    bottom (the tile is built for the store's 1400x560 slot; on paper that margin is wasted height)."""
+    im = PILImage.open(os.path.join(PICTURES, name)).convert("RGB")
+    im = im.crop((0, trim, im.width, im.height - trim))
+    buf = io.BytesIO()
+    im.save(buf, "PNG")
+    buf.seek(0)
+    return framed(buf, im.width, im.height, width)
+
+def figure(name, caption, width=FIG_W):
+    """A store screenshot with its caption underneath, kept together on one page."""
+    return [KeepTogether([Spacer(1, 5), picture(name, width), Spacer(1, 3), P(caption, cap), Spacer(1, 7)])]
 
 def bullets(items, level=1):
     st = b1 if level == 1 else b2
@@ -122,14 +172,14 @@ class NumberedCanvas(canvas.Canvas):
 # ---------- content ----------
 story = []
 
-title_img = Image(os.path.join(ICONS, "icon128.png"), 0.62 * inch, 0.62 * inch)
-title_txt = [P("Search Enhancer for FamilySearch", h1),
-             P("A Chrome extension that adds pre-filled record searches to a FamilySearch person page "
-               "\u00b7 reference sheet for version %s, November 2026" % VERSION, sub)]
-t = Table([[title_img, title_txt]], colWidths=[0.8 * inch, 6.3 * inch])
-t.setStyle(TableStyle([("VALIGN", (0, 0), (-1, -1), "MIDDLE"), ("LEFTPADDING", (0, 0), (-1, -1), 0),
-                       ("BOTTOMPADDING", (0, 0), (-1, -1), 4)]))
-story += [t, rule(), Spacer(1, 6)]
+# The banner: the marquee tile (icon, name, "Unofficial", the site list). COVER_W is also the width of
+# the first picture below it; the two sizes are what lets page 1 hold the banner, "What it is" and
+# that picture - widen either and the picture moves to page 2, leaving half of page 1 empty.
+COVER_W = 5.6 * inch
+story += [banner("marquee-1400x560.png", 52, COVER_W), Spacer(1, 7),
+          P("A Chrome extension that adds pre-filled record searches to a FamilySearch person page "
+            "\u00b7 reference sheet for version %s, November 2026" % VERSION, subc),
+          Spacer(1, 4), rule(), Spacer(1, 6)]
 
 # --- What it is
 story += section("What it is")
@@ -147,46 +197,13 @@ story += bullets([
     "click a map link, and Google\u2019s embedded map on the map page. Nothing is collected, and nothing in your tree is ever changed.",
     "Beyond the Search Records panel it also adds <b>map pins</b> after every place on the person page and the Sources tab, "
     "place-comparison links on the <b>Source Linker</b>, a numeric <b>Quality Score</b> tooltip, and (for church members) "
-    "four links in the <b>Temple</b> menu \u2014 see the last page. A <b>settings page</b> switches any of it off.",
+    "four links in the <b>Temple</b> menu \u2014 see the last pages. A <b>settings page</b> switches any of it off.",
 ])
-
-# --- Getting started
-story += section("Getting started")
-story += bullets([
-    "<b>Install:</b> from the Chrome Web Store once its listing is live (<b>Add to Chrome</b>). Until then, download the zip "
-    "from the project\u2019s help page \u2014 <b>familyhistorytoolsmith.github.io/search-enhancer-for-familysearch</b> \u2014 unzip it "
-    "to a folder you will keep, open <b>chrome://extensions</b>, switch on <b>Developer mode</b>, click <b>Load unpacked</b> and "
-    "pick that folder; the help page has the step-by-step version. Never run both copies at once.",
-    "Sign in to FamilySearch and open any person page. The new rows appear in the <b>Search Records</b> panel once the "
-    "person\u2019s details have rendered.",
-    "On FamilySearch\u2019s new <b>Labs</b> person page (the one with the \u201cOpt-Out of Experiment\u201d button), "
-    "<i>Search Records</i> is a button in the header: click it and the extra rows appear inside its dropdown about a third of a second later.",
-    "<b>Settings:</b> click the extension\u2019s toolbar icon (Chrome parks a new icon behind the puzzle-piece menu until you "
-    "pin it). Every feature can be switched off there \u2014 switch a site\u2019s menu off and FamilySearch\u2019s own row for "
-    "that site comes back \u2014 and the Ancestry / Findmypast links can be pointed at your own regional site.",
-    "<b>Updating:</b> the store copy updates itself. If rows ever look odd after an update, refresh the FamilySearch page. "
-    "A source copy is updated by replacing the folder, clicking the reload arrow on its card at chrome://extensions, then "
-    "refreshing the page.",
-])
-
-# --- Reading the menus
-story += section("Using the rows")
-story += bullets([
-    "A row ending in <b>%s</b> is a menu: click it to expand a list of searches, grouped under headers such as CENSUS, BIRTH, MARRIAGE. "
-    "Click an entry to open that search in a new tab." % TRI,
-    "<b>Hover</b> any row or entry for a tooltip that says exactly which collection, name and years a click will use.",
-    "<b>Shift+click</b> an entry to search with the <b>first given name only</b> (\u201cDoris\u201d rather than \u201cDoris Annie\u201d, "
-    "the way many indexes record people).",
-    "<b>Already attached:</b> searches whose collection is already attached to the person are dimmed and ticked %s "
-    "(never hidden \u2014 they stay clickable). On the classic page this switches on once you have opened the person\u2019s "
-    "<b>Sources</b> tab; on the Labs page it is automatic." % CHECK,
-    "Rows for FreeBMD, GRO, ScotlandsPeople, RootsIreland and IrishGenealogy appear <b>only</b> for people with events in "
-    "that country, so different people show different rows.",
-    "GRO and FreeBMD searches each reuse <b>one tab</b>, so a long session does not pile up tabs.",
-])
+story += figure("screenshot-1-search-records-before-after.png",
+                "The Search Records panel on a person page, without the extension and with it. The FamilySearch menu is open; "
+                "the greyed, ticked entries are searches whose record is already attached.", COVER_W)
 
 # --- Quick map table
-story += [PageBreak()]
 story += section("The ten rows at a glance")
 rows = [
     ["Row", "Shown for", "What it opens"],
@@ -228,7 +245,42 @@ tbl.setStyle(TableStyle([
 ]))
 story += [tbl]
 
-# ================= page 2: FamilySearch Collections =================
+# --- Getting started
+story += section("Getting started")
+story += bullets([
+    "<b>Install:</b> from the Chrome Web Store once its listing is live (<b>Add to Chrome</b>). Until then, download the zip "
+    "from the project\u2019s help page \u2014 <b>familyhistorytoolsmith.github.io/search-enhancer-for-familysearch</b> \u2014 unzip it "
+    "to a folder you will keep, open <b>chrome://extensions</b>, switch on <b>Developer mode</b>, click <b>Load unpacked</b> and "
+    "pick that folder; the help page has the step-by-step version. Never run both copies at once.",
+    "Sign in to FamilySearch and open any person page. The new rows appear in the <b>Search Records</b> panel once the "
+    "person\u2019s details have rendered.",
+    "On FamilySearch\u2019s new <b>Labs</b> person page (the one with the \u201cOpt-Out of Experiment\u201d button), "
+    "<i>Search Records</i> is a button in the header: click it and the extra rows appear inside its dropdown about a third of a second later.",
+    "<b>Settings:</b> click the extension\u2019s toolbar icon (Chrome parks a new icon behind the puzzle-piece menu until you "
+    "pin it). Every feature can be switched off there \u2014 switch a site\u2019s menu off and FamilySearch\u2019s own row for "
+    "that site comes back \u2014 and the Ancestry / Findmypast links can be pointed at your own regional site.",
+    "<b>Updating:</b> the store copy updates itself. If rows ever look odd after an update, refresh the FamilySearch page. "
+    "A source copy is updated by replacing the folder, clicking the reload arrow on its card at chrome://extensions, then "
+    "refreshing the page.",
+])
+
+# --- Reading the menus
+story += section("Using the rows")
+story += bullets([
+    "A row ending in <b>%s</b> is a menu: click it to expand a list of searches, grouped under headers such as CENSUS, BIRTH, MARRIAGE. "
+    "Click an entry to open that search in a new tab." % TRI,
+    "<b>Hover</b> any row or entry for a tooltip that says exactly which collection, name and years a click will use.",
+    "<b>Shift+click</b> an entry to search with the <b>first given name only</b> (\u201cDoris\u201d rather than \u201cDoris Annie\u201d, "
+    "the way many indexes record people).",
+    "<b>Already attached:</b> searches whose collection is already attached to the person are dimmed and ticked %s "
+    "(never hidden \u2014 they stay clickable). On the classic page this switches on once you have opened the person\u2019s "
+    "<b>Sources</b> tab; on the Labs page it is automatic." % CHECK,
+    "Rows for FreeBMD, GRO, ScotlandsPeople, RootsIreland and IrishGenealogy appear <b>only</b> for people with events in "
+    "that country, so different people show different rows.",
+    "GRO and FreeBMD searches each reuse <b>one tab</b>, so a long session does not pile up tabs.",
+])
+
+# ================= the FamilySearch menu =================
 story += section("FamilySearch " + TRI + " in detail")
 story += [P("The menu is rebuilt from the person every time it opens. Its groups, in order:", body), Spacer(1, 3)]
 story += bullets([
@@ -281,7 +333,7 @@ story += block(heading("Small things that make the searches better"), [
     "index selected localities only.",
 ])
 
-# ================= page 3: the other menus =================
+# ================= the other menus =================
 story += section("The other search menus")
 
 story += block(heading("Ancestry " + TRI), [
@@ -299,6 +351,9 @@ story += block(heading("Ancestry " + TRI), [
     "<b>Public Member Trees</b> \u2014 other members\u2019 trees, by name and birth / death years. Viewing records needs an "
     "Ancestry subscription; the settings page can point every link at your regional Ancestry site.",
 ])
+story += figure("screenshot-2-partner-menus.png",
+                "The Findmypast and Ancestry menus for two different people. Each lists only the searches that fit that "
+                "person’s years and places.")
 story += block(heading("MyHeritage " + TRI), [
     "<b>All Collections</b> \u2014 MyHeritage\u2019s own search for the person, as the native MyHeritage row ran it. Then the "
     "<b>all-records</b> search scoped to each country the person\u2019s events touch (name, birth and death years, gender; "
@@ -339,6 +394,9 @@ story += block(heading("GRO Index " + TRI + " \u2014 the General Register Office
     "Each entry opens GRO\u2019s form pre-filled and presses Search. If GRO shows its login page instead, sign in \u2014 the search "
     "then finishes itself.",
 ])
+story += figure("screenshot-3-gro-index.png",
+                "One click on <i>GRO births \u2014 1902 \u00b12</i> fills GRO\u2019s form and presses Search; the "
+                "mother\u2019s maiden name narrows the index to one record.")
 story += block(heading("ScotlandsPeople " + TRI + " \u2014 free login for index results; images cost credits", "sp32.png"), [
     "<b>Statutory registers</b> 1855+ (births and deaths send the mother\u2019s maiden surname, deaths the age \u00b110, marriages the "
     "spouse), <b>Old Parish Registers</b> 1553\u20131854 (both tiers when a window straddles 1855), and the "
@@ -365,9 +423,31 @@ story += block(heading("Newspapers " + TRI + " \u2014 grouped by region, only fo
     "a married woman gets one entry per name, the married ones starting at that marriage\u2019s year.",
 ])
 
-# ================= page 4: beyond the panel =================
-story += [PageBreak()]
+# --- At a FamilySearch Center (1.0.4): two more Search Records menus, only where FamilySearch lists the rows
+story += section("At a FamilySearch Center")
+story += bullets([
+    "On a FamilySearch Center’s network FamilySearch itself lists two more rows in Search Records: <i>Ancestry Institution</i> "
+    "and <i>MyHeritage Library Edition</i>, the editions a center’s patrons can use without an account of their own. Where "
+    "those rows are shown, each becomes a menu as well; away from a center neither exists, so neither menu appears.",
+    "<b>Ancestry Institution " + TRI + "</b> — the same list as the Ancestry menu (All Collections, the country searches, "
+    "Census, Civil records, Parish records, Public Member Trees) with every search on ancestryinstitution.com.",
+    "<b>MyHeritage Library Edition " + TRI + "</b> — All Collections, the all-records search per country and the censuses on "
+    "myheritagelibraryedition.com. No Family Trees entry: the Library Edition holds records only.",
+    "The ordinary Ancestry and MyHeritage menus stay beside them for patrons with accounts of their own. Findmypast needs no "
+    "twin — its ordinary link opens without a personal login on a center’s network.",
+])
+
+# ================= beyond the panel =================
 story += section("Beyond the Search Records panel")
+
+story += block(heading("Map pins on the person page and the Sources tab"), [
+    "A <b>%s map</b> link follows every place on the person page \u2014 the birth, christening, death and burial places, each "
+    "marriage place, the residences and other facts under <i>Other Information</i> \u2014 and every place field of an expanded "
+    "record on the Sources tab. Click it and Google Maps opens pinned on that place." % PIN,
+    "The place is located first with OpenStreetMap\u2019s free geocoder (only on the click; a namesake is settled by the other "
+    "places on the page). A country, state or county opens <b>framed</b> \u2014 the map fitted to the region with its boundary "
+    "drawn \u2014 rather than pinned at its centre. A 1940 census\u2019s \u201cSame Place\u201d points at the record\u2019s own event place.",
+])
 
 story += block(heading("Source Linker: compare two places on a map"), [
     "When you attach a record, the linker shows the record\u2019s facts on the left and the tree\u2019s on the right. A "
@@ -383,26 +463,9 @@ story += block(heading("Source Linker: compare two places on a map"), [
     "read <b>%s same place</b>; a place inside a region the other side names (<i>Pennsylvania</i> against <i>Coalmont, "
     "Huntingdon, Pennsylvania</i>) reads <b>%s in Pennsylvania</b>. Every click reuses one map tab." % (PIN, PIN, PIN),
 ])
-
-story += block(heading("Map pins on the person page and the Sources tab"), [
-    "A <b>%s map</b> link follows every place on the person page \u2014 the birth, christening, death and burial places, each "
-    "marriage place, the residences and other facts under <i>Other Information</i> \u2014 and every place field of an expanded "
-    "record on the Sources tab. Click it and Google Maps opens pinned on that place." % PIN,
-    "The place is located first with OpenStreetMap\u2019s free geocoder (only on the click; a namesake is settled by the other "
-    "places on the page). A country, state or county opens <b>framed</b> \u2014 the map fitted to the region with its boundary "
-    "drawn \u2014 rather than pinned at its centre. A 1940 census\u2019s \u201cSame Place\u201d points at the record\u2019s own event place.",
-])
-
-story += block(heading("Quality Score: the number behind the badge"), [
-    "FamilySearch shows a person\u2019s Data Quality Score as a word (Low / Medium / High). <b>Hover the badge</b> and a tooltip "
-    "shows the number on a 0\u2013100 scale with one decimal, the thresholds "
-    "(Low &lt;40 \u00b7 Medium 40\u201384.9 \u00b7 High \u226585), the birth segment FamilySearch scored the person under "
-    "(<i>Scored as: United Kingdom 1800 \u2013 1920</i>), and a <b>\u201cTo reach High:\u201d</b> list.",
-    "Each outstanding item becomes an action, biggest gain first, with the score that fix alone would give \u2014 "
-    "<i>Add a burial \u2192 85.1</i>, <i>Add the month to the 1985 death \u2192 79.5</i> \u2014 so you can see which one is worth doing.",
-    "The number is read from the response the page itself fetches to draw the badge; the extension makes no request of its own. "
-    "A High person with nothing left reads \u201cNothing outstanding.\u201d",
-])
+story += figure("screenshot-4-source-linker-map.png",
+                "The record says Dalston, the tree says Islington. One click on <i>compare</i> puts both on a map: "
+                "1.1 miles apart.")
 
 story += block(heading("Temple menu links (signed-in church members only)"), [
     "Four links are added after <i>Ordinances Ready</i> in the top-level <b>Temple</b> menu on every FamilySearch page, each "
@@ -419,19 +482,19 @@ story += block(heading("Temple menu links (signed-in church members only)"), [
     "Accounts without a Temple menu are unaffected.",
 ])
 
-# --- At a FamilySearch Center (1.0.4): two more Search Records menus, only where FamilySearch lists the rows
-story += section("At a FamilySearch Center")
-story += bullets([
-    "On a FamilySearch Center’s network FamilySearch itself lists two more rows in Search Records: <i>Ancestry Institution</i> "
-    "and <i>MyHeritage Library Edition</i>, the editions a center’s patrons can use without an account of their own. Where "
-    "those rows are shown, each becomes a menu as well; away from a center neither exists, so neither menu appears.",
-    "<b>Ancestry Institution " + TRI + "</b> — the same list as the Ancestry menu (All Collections, the country searches, "
-    "Census, Civil records, Parish records, Public Member Trees) with every search on ancestryinstitution.com.",
-    "<b>MyHeritage Library Edition " + TRI + "</b> — All Collections, the all-records search per country and the censuses on "
-    "myheritagelibraryedition.com. No Family Trees entry: the Library Edition holds records only.",
-    "The ordinary Ancestry and MyHeritage menus stay beside them for patrons with accounts of their own. Findmypast needs no "
-    "twin — its ordinary link opens without a personal login on a center’s network.",
+story += block(heading("Quality Score: the number behind the badge"), [
+    "FamilySearch shows a person\u2019s Data Quality Score as a word (Low / Medium / High). <b>Hover the badge</b> and a tooltip "
+    "shows the number on a 0\u2013100 scale with one decimal, the thresholds "
+    "(Low &lt;40 \u00b7 Medium 40\u201384.9 \u00b7 High \u226585), the birth segment FamilySearch scored the person under "
+    "(<i>Scored as: United Kingdom 1800 \u2013 1920</i>), and a <b>\u201cTo reach High:\u201d</b> list.",
+    "Each outstanding item becomes an action, biggest gain first, with the score that fix alone would give \u2014 "
+    "<i>Add a burial \u2192 85.1</i>, <i>Add the month to the 1985 death \u2192 79.5</i> \u2014 so you can see which one is worth doing.",
+    "The number is read from the response the page itself fetches to draw the badge; the extension makes no request of its own. "
+    "A High person with nothing left reads \u201cNothing outstanding.\u201d",
 ])
+story += figure("screenshot-5-quality-score-settings.png",
+                "Left: the tooltip on a Medium badge and the steps that would lift the score to High. Right: the settings "
+                "page, a switch for every feature.")
 
 story += section("Good to know")
 story += bullets([
