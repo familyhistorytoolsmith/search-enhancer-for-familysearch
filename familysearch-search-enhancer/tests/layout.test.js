@@ -194,5 +194,41 @@ check("clickNative: clicks the label leaf once (bubbles to the row's control), r
 target.leaf.isConnected = false;
 check("clickNative: a detached entry / no entry is refused (the caller opens its reserve URL)", FSSE.clickNative(target) === false && FSSE.clickNative(null) === false);
 
+// v1.0.4 — a FamilySearch CENTER's card (Kevin's Boise FSC screenshot, 2026-11-04): FamilySearch ·
+// Ancestry · Ancestry Institution · MyHeritage · MyHeritage Library Edition · Findmypast · Geneanet ·
+// Storied · Filae · Google. Each of the two extra rows is a native entry of its own: found by its
+// exact label (never as "Ancestry" / "MyHeritage"), hidden on its own, absent everywhere else.
+const fscCard = (wrap) => {
+  const rows = ["Ancestry", "Ancestry Institution", "MyHeritage", "MyHeritage Library Edition"].map((l) => li(l, l === "Ancestry Institution" ? "https://www.ancestryinstitution.com/search?name=Charles+Richard_Hardie" : ""));
+  const partners = wrap ? [el("li", [el("ul", rows.slice(0, 2))]), el("li", [el("ul", rows.slice(2))])] : rows;
+  return el("div", [el("h3", ["Search Records"]), el("ul", [li("FamilySearch", NATIVE_URL), ...partners, ...["Findmypast", "Geneanet", "Storied", "Filae", "Google"].map((l) => li(l))]), el("a", ["Search Trees"])]);
+};
+const fsc = fscCard(false);
+globalThis.document = el("body", [bigPageText(), fsc, narrowPanel()]);
+check("center: the card is picked via its heading", FSSE.findSection() === fsc);
+const nAnc = FSSE.findNativeEntry(fsc, ["Ancestry"]);
+const nInst = FSSE.findNativeEntry(fsc, ["Ancestry Institution"]);
+const nMh = FSSE.findNativeEntry(fsc, ["MyHeritage"]);
+const nLe = FSSE.findNativeEntry(fsc, ["MyHeritage Library Edition"]);
+check("center: 'Ancestry' and 'Ancestry Institution' are two different rows, each found by its exact label; the institution row's link is read",
+  nAnc && nInst && nAnc.row !== nInst.row && nAnc.row.textContent === "Ancestry" && nInst.row.textContent === "Ancestry Institution" && nInst.row.tagName === "LI" && nInst.label === "Ancestry Institution" && nInst.url === "https://www.ancestryinstitution.com/search?name=Charles+Richard_Hardie" && nAnc.url === null);
+check("center: 'MyHeritage' and 'MyHeritage Library Edition' likewise (no link on the row → the click is handed over)",
+  nMh && nLe && nMh.row !== nLe.row && nMh.row.textContent === "MyHeritage" && nLe.row.textContent === "MyHeritage Library Edition" && nLe.url === null && nLe.leaf.textContent === "MyHeritage Library Edition");
+check("center: hiding the institution row leaves 'Ancestry' and the Library Edition row shown — and the reverse",
+  FSSE.setNativeHidden(nInst.row, true, "ancestry-institution") && nInst.row.style.display === "none" && nAnc.row.style.display !== "none" && nLe.row.style.display !== "none" &&
+  FSSE.setNativeHidden(nAnc.row, true, "ancestry-records") && FSSE.findNativeEntry(fsc, ["Ancestry Institution"]).row === nInst.row && FSSE.findNativeEntry(fsc, ["Ancestry"]).row === nAnc.row && nMh.row.style.display !== "none");
+check("center: the hidden institution row is still found (it stays the anchor of its menu) and carries its site's marker", FSSE.findEntryByLabel(fsc, "Ancestry Institution") === nInst.row && nInst.row.getAttribute("data-fsse-hidden") === "ancestry-institution");
+check("not a center: no such rows on the classic card, the Labs dropdown or the narrow cluster (quietly null → the menus never apply)",
+  FSSE.findNativeEntry(legacy, ["Ancestry Institution"]) === null && FSSE.findNativeEntry(legacy, ["MyHeritage Library Edition"]) === null && FSSE.findNativeEntry(section, ["Ancestry Institution"]) === null && FSSE.findNativeEntry(narrow, ["MyHeritage Library Edition"]) === null);
+// Should FamilySearch ever wrap a partner's two rows in one element, each row is still its own entry
+// (the two names are KNOWN entries of their own, so the wrapper counts as a two-entry list).
+const fscWrapped = fscCard(true);
+const wAnc = FSSE.findNativeEntry(fscWrapped, ["Ancestry"]);
+const wInst = FSSE.findNativeEntry(fscWrapped, ["Ancestry Institution"]);
+const wLe = FSSE.findNativeEntry(fscWrapped, ["MyHeritage Library Edition"]);
+check("center, partner rows wrapped pairwise: each row is found on its own — hiding 'Ancestry' never takes the institution row with it",
+  wAnc && wInst && wLe && wAnc.row.textContent === "Ancestry" && wInst.row.textContent === "Ancestry Institution" && wLe.row.textContent === "MyHeritage Library Edition" && wAnc.row !== wInst.row,
+  JSON.stringify([wAnc && wAnc.row.textContent, wInst && wInst.row.textContent, wLe && wLe.row.textContent]));
+
 console.log(fails ? `\n${fails} FAILURE(S)` : "\nALL PASS");
 process.exit(fails ? 1 : 0);

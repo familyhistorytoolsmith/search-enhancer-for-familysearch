@@ -17,7 +17,7 @@ native **"Search Records"** list on a FamilySearch person page
 
 **Links:** [help page](https://familyhistorytoolsmith.github.io/search-enhancer-for-familysearch/) · [feature guide (PDF)](https://familyhistorytoolsmith.github.io/search-enhancer-for-familysearch/feature-guide.pdf) · [privacy policy](https://familyhistorytoolsmith.github.io/search-enhancer-for-familysearch/privacy-policy.html) · [latest release](https://github.com/familyhistorytoolsmith/search-enhancer-for-familysearch/releases/latest) · [source](https://github.com/familyhistorytoolsmith/search-enhancer-for-familysearch) — open source under the [MIT License](../LICENSE).
 
-Every addition can be switched off on the extension's settings page, and the Ancestry / Findmypast links can be pointed at your regional site (see [Settings](#settings)). Out of the box it adds ten rows to the **Search Records** panel (four of them take the place of the native *Ancestry*, *FamilySearch*, *MyHeritage* and *Findmypast* rows, whose own searches live on as the first entry of each menu) and — for signed-in church members, on **every** FamilySearch page — four links to the top-level **Temple** menu after *Ordinances Ready*: **Temple Opportunities**, **Family Ordinance Opportunities**, **Remaining Temple Ordinances** and **Families with Remaining Ordinances** (each opens the matching familysearch.org page in the same tab, like the native menu items; the fourth is a FamilySearch Labs experiment — see [The Temple menu and the Labs experiment](#the-temple-menu-and-the-labs-experiment); accounts without the Temple menu are unaffected). On the **Source Linker** it adds a small **📍 compare** link after each place so you can see how far apart the record's place and the tree's place really are (see [Source Linker: compare two places on a map](#source-linker-compare-two-places-on-a-map)). And on a person page, hovering the **Data Quality Score** badge (Low / Medium / High) shows the **number behind the word**, the thresholds, and what would raise it (see [Quality Score: the number behind the badge](#quality-score-the-number-behind-the-badge)).
+Every addition can be switched off on the extension's settings page, and the Ancestry / Findmypast links can be pointed at your regional site (see [Settings](#settings)). Out of the box it adds ten rows to the **Search Records** panel (four of them take the place of the native *Ancestry*, *FamilySearch*, *MyHeritage* and *Findmypast* rows, whose own searches live on as the first entry of each menu; on a FamilySearch Center's network two more rows become menus — see [At a FamilySearch Center](#at-a-familysearch-center)) and — for signed-in church members, on **every** FamilySearch page — four links to the top-level **Temple** menu after *Ordinances Ready*: **Temple Opportunities**, **Family Ordinance Opportunities**, **Remaining Temple Ordinances** and **Families with Remaining Ordinances** (each opens the matching familysearch.org page in the same tab, like the native menu items; the fourth is a FamilySearch Labs experiment — see [The Temple menu and the Labs experiment](#the-temple-menu-and-the-labs-experiment); accounts without the Temple menu are unaffected). On the **Source Linker** it adds a small **📍 compare** link after each place so you can see how far apart the record's place and the tree's place really are (see [Source Linker: compare two places on a map](#source-linker-compare-two-places-on-a-map)). And on a person page, hovering the **Data Quality Score** badge (Low / Medium / High) shows the **number behind the word**, the thresholds, and what would raise it (see [Quality Score: the number behind the badge](#quality-score-the-number-behind-the-badge)).
 
 | New row | Placed after | Opens |
 | --- | --- | --- |
@@ -40,6 +40,25 @@ exactly as it would have — including the one-time partner token MyHeritage's l
 the partner site receives exactly what FamilySearch sends it; the extension never guesses at
 those URLs. Only on a layout with no native entry at all does it build a search of its own from
 the tree's vitals, and the entry's tooltip says so.
+
+### At a FamilySearch Center
+
+On a FamilySearch Center's network FamilySearch itself lists two more rows in Search Records —
+*Ancestry Institution* (after *Ancestry*) and *MyHeritage Library Edition* (after *MyHeritage*):
+the editions a center's patrons can use without an account of their own. Where FamilySearch shows
+those rows, each becomes a menu as well (new in 1.0.4):
+
+| New row | Placed | Opens |
+| --- | --- | --- |
+| **Ancestry Institution ▸** | **in place of** the native *Ancestry Institution* row | The same list as *Ancestry ▸* — **All Collections — \<name\> (b–d)** (FamilySearch's own institution link, your click handed to it), the country searches, **Census**, **Civil records**, **Parish records** and *Public Member Trees* — with every search on `ancestryinstitution.com`, whatever the Regional sites setting says. |
+| **MyHeritage Library Edition ▸** | **in place of** the native *MyHeritage Library Edition* row | **All Collections — \<name\> (b–d)** (FamilySearch's own Library Edition link, which it builds at the click), then the all-records search per country and the **Census** group on `myheritagelibraryedition.com`. No *Family Trees* entry — the Library Edition holds records only. |
+
+The ordinary *Ancestry ▸* and *MyHeritage ▸* menus stay beside them: a patron with an account
+keeps their own site (and their tree), one without uses the institution row. *Findmypast ▸* needs
+no twin — FamilySearch's Findmypast link stays on findmypast.com, which a center's network opens
+without a personal login. Away from a center FamilySearch does not list the two rows, so neither
+menu ever appears; nothing in the extension tries to detect where you are. Each has its own switch
+under **FamilySearch Center menus** in the [Settings](#settings).
 
 ### The FamilySearch menu
 
@@ -332,10 +351,11 @@ Nothing on the FamilySearch page itself leads there — the menus stay search en
 | --- | --- | --- |
 | **Search Records menus** | FamilySearch · Ancestry · MyHeritage · Findmypast | These four menus stand in for FamilySearch's own row for that site. Untick one and our menu goes, and **FamilySearch's standard row comes back** — the thing to do when you have no account with that site and only want the standard search. |
 | | FreeBMD · GRO Index · ScotlandsPeople · RootsIreland · IrishGenealogy · Newspapers | The row is never added (these appear only when the person's places fit anyway). |
+| **FamilySearch Center menus** | Ancestry Institution · MyHeritage Library Edition | These two appear only where FamilySearch lists those rows — on a FamilySearch Center's network. Untick one and our menu goes, and FamilySearch's standard row comes back. |
 | **Map pins** | Person page · Sources tab · Source Linker | No 📍 links on that kind of page; any already shown disappear within a second. |
 | **Quality Score** | the tooltip | Hovering the badge shows only what FamilySearch shows. |
 | **Temple menu** | Temple Opportunities · Family Ordinance Opportunities · Remaining Temple Ordinances · Families with Remaining Ordinances | That link is not added (for the last one, no banner on its page either) — handy should FamilySearch start offering one of these tools itself. |
-| **Regional sites** | *Ancestry* — ancestry.com (default), ancestry.co.uk, .ca, .com.au, .de, .fr, .it, .se, .mx, or the library / FamilySearch Center editions; *FindMyPast* — findmypast.com (default), .co.uk, .ie, .com.au | Every Ancestry or Findmypast link **this extension builds** (the Newspapers menu's Findmypast entries included) opens on the chosen site — pick the one your subscription is on. The search grammar is the same on every regional site. FamilySearch's own *All Collections* entry still opens wherever FamilySearch sends it. |
+| **Regional sites** | *Ancestry* — ancestry.com (default), ancestry.co.uk, .ca, .com.au, .de, .fr, .it, .se, .mx, or the library / FamilySearch Center editions; *FindMyPast* — findmypast.com (default), .co.uk, .ie, .com.au | Every Ancestry or Findmypast link **this extension builds** (the Newspapers menu's Findmypast entries included) opens on the chosen site — pick the one your subscription is on. The search grammar is the same on every regional site. FamilySearch's own *All Collections* entry still opens wherever FamilySearch sends it, and the *Ancestry Institution* menu always uses ancestryinstitution.com. |
 | **Advanced** | Console diagnostics | On: the extension's `[FSSE]` messages appear in the DevTools console (filter by `FSSE`) — turn it on to paste the lines into a bug report, off again afterwards. |
 
 Changes apply at once; open FamilySearch tabs follow within a second, no reload needed.

@@ -90,12 +90,20 @@
   // FamilySearch Full Text · FamilySearch Trees" (a group of its own) then Ancestry ·
   // MyHeritage · Findmypast · Geneanet · Storied · Filae · Google. The two FS-only names are
   // listed so that group counts as an entry LIST for findEntryByLabel (≥ 2 known names).
+  // v1.0.4: on a FamilySearch CENTER's network the list gains "Ancestry Institution" (after
+  // Ancestry) and "MyHeritage Library Edition" (after MyHeritage) — Kevin's Boise FSC screenshot,
+  // 2026-11-04. Listed as names of their own (the longer name is stripped before "Ancestry" /
+  // "MyHeritage" is counted), so that should FamilySearch ever wrap a partner's two rows in one
+  // element, that wrapper counts as a two-entry list and each row is still found — and hidden —
+  // on its own, never as a pair.
   const KNOWN = [
     "FamilySearch",
     "FamilySearch Full Text",
     "FamilySearch Trees",
     "Ancestry",
+    "Ancestry Institution",
     "MyHeritage",
+    "MyHeritage Library Edition",
     "Findmypast",
     "American Ancestors",
     "Geneanet",

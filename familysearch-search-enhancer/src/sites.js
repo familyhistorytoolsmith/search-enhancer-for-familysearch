@@ -22,7 +22,10 @@
 //                  the Labs dropdown's "FamilySearch Records" entry; v0.2.102: ancestry-
 //                  records replaces the native "Ancestry" row). content.js hides that entry
 //                  while our row is present and hands the link it carries to options() as
-//                  p.nativeUrls[<site id>].
+//                  p.nativeUrls[<site id>]. A menu for a row FamilySearch shows only in some
+//                  places gates itself on that row: `applies: (p) => nativeRowOf(p, id)` (v1.0.4:
+//                  "Ancestry Institution" / "MyHeritage Library Edition", the two rows a
+//                  FamilySearch Center's network adds).
 //   - tooltip:     OPTIONAL static hover text (defaults to label)
 //   - describe(p): OPTIONAL dynamic hover text, refreshed as the person's vitals load (a
 //                  `section: "temple"` row is described without a person — its text may follow
@@ -1002,10 +1005,12 @@
   // dropdown, "Ancestry opens on" until v0.2.136 — ancestry.com by default; ancestry.co.uk, .ca, .com.au, …; the search
   // grammar and the collection ids are the same on every regional host). FamilySearch's own
   // "All Collections" hand-over is untouched — FS sends that click where it will.
-  const ancHost = () => `https://www.${(FSSE.settings && FSSE.settings.get("host.ancestry")) || "ancestry.com"}`;
+  // v1.0.4: `host` overrides the setting — the "Ancestry Institution" menu (a FamilySearch Center's
+  // row) builds every URL on ancestryinstitution.com whatever the dropdown says.
+  const ancHost = (host) => `https://www.${host || (FSSE.settings && FSSE.settings.get("host.ancestry")) || "ancestry.com"}`;
   FSSE.ancestryHost = ancHost;
-  function ancestrySearchUrl(p, surname, priority) {
-    const u = new URL(`${ancHost()}/search/`);
+  function ancestrySearchUrl(p, surname, priority, host) {
+    const u = new URL(`${ancHost(host)}/search/`);
     if (p.given || surname) u.searchParams.set("name", `${p.given || ""}_${surname || ""}`.trim());
     const by = birthYearOf(p); // christening/burial years stand in, as everywhere else
     const dy = deathYearOf(p);
@@ -1016,9 +1021,9 @@
     if (priority) u.searchParams.set("priority", priority);
     return u.toString();
   }
-  function ancestryPmtUrl(p) {
+  function ancestryPmtUrl(p, host) {
     // Collection 1030 = Ancestry Public Member Trees (the pre-v0.2.45 top-level row, verbatim).
-    const u = new URL(`${ancHost()}/search/collections/1030/`);
+    const u = new URL(`${ancHost(host)}/search/collections/1030/`);
     if (p.given || p.surname) u.searchParams.set("name", `${p.given || ""}_${p.surname || ""}`.trim());
     if (p.birthYear) u.searchParams.set("birth", p.birthYear);
     if (p.deathYear) u.searchParams.set("death", p.deathYear);
@@ -1083,8 +1088,9 @@
   const aPlace = (s) => aEnc(String(s == null ? "" : s).trim().replace(/,\s*/g, "-"));
   const aName = (given, surname) => `${aEnc(given)}_${aEnc(surname)}`;
   // Build one Ancestry collection search. q = { name: [given, surname], birth/death/marriage:
-  // [year, place], residence: place, spouse/father/mother: [given, surname], gender }.
-  function ancUrl(id, q) {
+  // [year, place], residence: place, spouse/father/mother: [given, surname], gender }. `host`
+  // (v1.0.4) = another Ancestry host than the settings' one (the Ancestry Institution menu).
+  function ancCollectionUrl(id, q, host) {
     const parts = [];
     const ev = (key, year, place) => {
       const v = `${year != null ? year : ""}${place ? "_" + aPlace(place) : ""}`;
@@ -1102,9 +1108,9 @@
     person("father", q.father);
     person("mother", q.mother);
     if (q.gender) parts.push(`gender=${q.gender}`);
-    return `${ancHost()}/search/collections/${id}/?${parts.join("&")}`;
+    return `${ancHost(host)}/search/collections/${id}/?${parts.join("&")}`;
   }
-  FSSE.ancestryCollectionUrl = ancUrl; // exposed for tests
+  FSSE.ancestryCollectionUrl = ancCollectionUrl; // exposed for tests
   // The record-set groups of the Ancestry menu (v0.2.119): CENSUS (every bracketed census year that
   // Ancestry holds, via the same `censusYears` the FamilySearch menu uses — country / state /
   // Wales variants), CIVIL RECORDS (the vital indexes per event region + state/provincial sets,
@@ -1112,8 +1118,9 @@
   // burials per married surname). Same gates as the Findmypast menu: a woman's surname of the
   // year, death entries never for a living person, the inferred marriage window for undated
   // spouses, the unknown-death window (v0.2.107) on every death set it reaches.
-  function ancestryRecordOptions(p, add) {
+  function ancestryRecordOptions(p, add, host) {
     if (!p.given && !p.surname) return;
+    const ancUrl = (id, q) => ancCollectionUrl(id, q, host); // every set of one menu on one host
     const by = birthYearOf(p);
     const dy = deathYearOf(p);
     const gender = /^f/i.test(p.sex || "") ? "f" : /^m/i.test(p.sex || "") ? "m" : null;
@@ -1271,7 +1278,16 @@
   }
   FSSE.ancestryRecordOptions = ancestryRecordOptions; // exposed for tests
 
-  function ancestryOptions(p) {
+  // v1.0.4 — `opts` = { site, host, brand } builds the SAME menu for another Ancestry host: the
+  // "Ancestry Institution" row FamilySearch lists on a FamilySearch Center's network (Kevin's find
+  // at the Boise FSC, 2026-11-04 — its link is FS's Ancestry link verbatim on
+  // www.ancestryinstitution.com, open there without an Ancestry account). `site` keys the native
+  // row (p.nativeUrls / p.nativeRows), `host` every URL we build, `brand` the wording.
+  function ancestryOptions(p, opts) {
+    const cfg = opts || {};
+    const siteId = cfg.site || "ancestry-records";
+    const host = cfg.host || null;
+    const brand = cfg.brand || "Ancestry";
     const out = [];
     const countries = ancestryCountries(p);
     const by = birthYearOf(p);
@@ -1296,8 +1312,8 @@
     // Ancestry), opened byte-for-byte; when the row has no link, or the layout has no
     // Ancestry row, our global all-countries search stands in (name + birth/death years +
     // gender, no priority).
-    const nativeUrl = nativeUrlOf(p, "ancestry-records");
-    const nativeRow = nativeRowOf(p, "ancestry-records") || !!nativeUrl;
+    const nativeUrl = nativeUrlOf(p, siteId);
+    const nativeRow = nativeRowOf(p, siteId) || !!nativeUrl;
     if (nativeRow) {
       // v0.2.105 (Kevin: "let FamilySearch build the needed URL rather than assume"): the row is
       // on the page → the click is handed to it; a link read off it is only the reserve URL.
@@ -1305,15 +1321,15 @@
         group: "All records", // v0.2.106 — group headers like the MyHeritage menu (Kevin's screenshot)
         label: allLabel,
         nativeClick: true,
-        url: nativeUrl || (p.given || p.surname ? ancestrySearchUrl(p, p.surname, null) : `${ancHost()}/search/`),
-        tooltip: `Ancestry's own search for ${fullName(p, p.surname) || "this person"} across all its collections — FamilySearch's own Ancestry entry (hidden behind this menu) runs it: your click is handed to it, so Ancestry receives exactly what FamilySearch sends.`,
+        url: nativeUrl || (p.given || p.surname ? ancestrySearchUrl(p, p.surname, null, host) : `${ancHost(host)}/search/`),
+        tooltip: `${brand}'s own search for ${fullName(p, p.surname) || "this person"} across all its collections — FamilySearch's own ${brand} entry (hidden behind this menu) runs it: your click is handed to it, so ${brand} receives exactly what FamilySearch sends.`,
       });
     } else if (p.given || p.surname) {
       out.push({
         group: "All records",
         label: allLabel,
-        url: ancestrySearchUrl(p, p.surname, null),
-        tooltip: `Ancestry's global search, all countries and collections: ${fullName(p, p.surname)}, ${lived}. (The native Ancestry search link was not found on this page, so this search is built from the tree's vitals.)`,
+        url: ancestrySearchUrl(p, p.surname, null, host),
+        tooltip: `${brand}'s global search, all countries and collections: ${fullName(p, p.surname)}, ${lived}. (The native ${brand} search link was not found on this page, so this search is built from the tree's vitals.)`,
       });
     }
     if (p.given || p.surname) {
@@ -1326,40 +1342,45 @@
           out.push({
             group: "All records",
             label: `${countryLabel} — ${fullName(p, p.surname)} (maiden)`,
-            url: ancestrySearchUrl(p, p.surname, priority),
-            tooltip: `Ancestry search ${where}: ${fullName(p, p.surname)} (maiden name), ${lived}.`,
+            url: ancestrySearchUrl(p, p.surname, priority, host),
+            tooltip: `${brand} search ${where}: ${fullName(p, p.surname)} (maiden name), ${lived}.`,
           });
           for (const sn of married) {
             out.push({
               group: "All records",
               label: `${countryLabel} — ${fullName(p, sn)} (married)`,
-              url: ancestrySearchUrl(p, sn, priority),
-              tooltip: `Ancestry search ${where}: ${fullName(p, sn)} (married name), ${lived}.`,
+              url: ancestrySearchUrl(p, sn, priority, host),
+              tooltip: `${brand} search ${where}: ${fullName(p, sn)} (married name), ${lived}.`,
             });
           }
         } else {
           out.push({
             group: "All records",
             label: `${countryLabel} — ${fullName(p, p.surname)}`,
-            url: ancestrySearchUrl(p, p.surname, priority),
-            tooltip: `Ancestry search ${where}: ${fullName(p, p.surname)}, ${lived}.`,
+            url: ancestrySearchUrl(p, p.surname, priority, host),
+            tooltip: `${brand} search ${where}: ${fullName(p, p.surname)}, ${lived}.`,
           });
         }
       }
     }
     // v0.2.119 — CENSUS / CIVIL RECORDS / PARISH RECORDS, the Findmypast treatment (Kevin's ask).
-    ancestryRecordOptions(p, (group, label, url, tooltip) => out.push({ group, label, url, tooltip }));
+    ancestryRecordOptions(p, (group, label, url, tooltip) => out.push({ group, label, url, tooltip }), host);
     // Public Member Trees — the former top-level row, unchanged URL grammar; its own FAMILY
-    // TREES group (v0.2.106), mirroring the MyHeritage menu.
+    // TREES group (v0.2.106), mirroring the MyHeritage menu. (The institution edition carries the
+    // member trees too, read-only.)
     out.push({
       group: "Family trees",
       label: "Public Member Trees", // "Ancestry Public Member Trees" until v0.2.113
-      url: ancestryPmtUrl(p),
+      url: ancestryPmtUrl(p, host),
       tooltip: `Ancestry Public Member Trees (collection 1030): ${fullName(p, p.surname) || "this person"}${lived !== "no dated vitals" ? `, ${lived}` : ""}.`,
     });
     return out;
   }
   FSSE.ancestryOptions = ancestryOptions; // exposed for tests
+  // v1.0.4 — the FamilySearch Center menu: the same list on Ancestry's institution host.
+  const ANC_INSTITUTION = { site: "ancestry-institution", host: "ancestryinstitution.com", brand: "Ancestry Institution" };
+  const ancestryInstitutionOptions = (p) => ancestryOptions(p, ANC_INSTITUTION);
+  FSSE.ancestryInstitutionOptions = ancestryInstitutionOptions; // exposed for tests
 
   // ---- FreeBMD (the "FreeBMD" menu, v0.2.47) ---------------------------------------------------
   // FreeBMD transcribes the E&W GRO civil-registration indexes (births/marriages/deaths from
@@ -2313,12 +2334,13 @@
   };
   const mhCountries = (p) => ancestryCountries(p).map((c) => MH_COUNTRY[c.country] || c.country);
   const mhVal = (s) => encodeURIComponent(String(s)).replace(/%20/g, "%2F3");
-  function mhUrl(pathAndForm, p, surname, withEvents, country) {
+  // `base` (v1.0.4) = another MyHeritage host's /research root than MH_BASE (the Library Edition).
+  function mhUrl(pathAndForm, p, surname, withEvents, country, base) {
     const g = /^m/i.test(p.sex || "") ? "M" : /^f/i.test(p.sex || "") ? "F" : null;
     const first = String(p.given || "").trim().split(/\s+/)[0];
     let qname = `Name+fn.${mhVal(first)}+fnmo.1+ln.${mhVal(surname)}+lnmsrs.false`;
     if (g) qname += `+g.${g}`;
-    let url = `${MH_BASE}${pathAndForm}&qname=${qname}`;
+    let url = `${base || MH_BASE}${pathAndForm}&qname=${qname}`;
     if (withEvents) {
       const by = birthYearOf(p);
       const dy = deathYearOf(p);
@@ -2332,7 +2354,18 @@
     return url;
   }
   FSSE.mhCountries = mhCountries; // exposed for tests
-  function mhOptions(p) {
+  // v1.0.4 — `opts` = { site, base, brand, trees } builds the same menu for another MyHeritage host:
+  // the "MyHeritage Library Edition" row FamilySearch lists on a FamilySearch Center's network
+  // (Kevin's find at the Boise FSC, 2026-11-04: FS's link there is OUR master-form grammar on
+  // myheritagelibraryedition.com — qname fn/ln + fnmo.1, qevents-event1 birth, the any-event
+  // place — plus catId=1 and a click-time csrf_token). `site` keys the native row, `base` every
+  // URL we build, `brand` the wording; `trees: false` drops the Family Trees entry (the Library
+  // Edition is records only — no member trees, no Smart Matches).
+  function mhOptions(p, opts) {
+    const cfg = opts || {};
+    const siteId = cfg.site || "mh-records";
+    const base = cfg.base || MH_BASE;
+    const brand = cfg.brand || "MyHeritage";
     const out = [];
     const first = String(p.given || "").trim().split(/\s+/)[0];
     const by = birthYearOf(p);
@@ -2347,8 +2380,8 @@
     // Mary Cullum (1891-1956)'") carries the name + life span like every other entry, and no
     // entry of this menu says "MyHeritage" any more ("it should be obvious that each is a
     // MyHeritage search selection") — the bare "All Collections" only until the name scrapes.
-    const nativeUrl = nativeUrlOf(p, "mh-records");
-    const nativeRow = nativeRowOf(p, "mh-records") || !!nativeUrl;
+    const nativeUrl = nativeUrlOf(p, siteId);
+    const nativeRow = nativeRowOf(p, siteId) || !!nativeUrl;
     const who = first && p.surname ? `${first} ${p.surname}` : "this person";
     const allLabel = first && p.surname ? `All Collections — ${first} ${p.surname}${lived}` : "All Collections";
     if (nativeRow) {
@@ -2358,14 +2391,14 @@
       // rather than assume"); a read link / our grammar is only the reserve should the row
       // vanish between ticks.
       out.push({ group: "All records", label: allLabel, nativeClick: true,
-        url: nativeUrl || (first && p.surname ? mhUrl(MH_MASTER, p, p.surname, true) : "https://www.myheritage.com/research"),
-        tooltip: `MyHeritage's own search for ${who} across all its collections — FamilySearch's own MyHeritage entry (hidden behind this menu) runs it: your click is handed to it, so MyHeritage receives exactly what FamilySearch sends (its partner link with the one-time token).` });
+        url: nativeUrl || (first && p.surname ? mhUrl(MH_MASTER, p, p.surname, true, null, base) : base),
+        tooltip: `${brand}'s own search for ${who} across all its collections — FamilySearch's own ${brand} entry (hidden behind this menu) runs it: your click is handed to it, so ${brand} receives exactly what FamilySearch sends (its partner link with the one-time token).` });
     }
     if (!first || !p.surname) return out;
     if (!nativeUrl && !nativeRow) {
       out.push({ group: "All records", label: allLabel,
-        url: mhUrl(MH_MASTER, p, p.surname, true),
-        tooltip: `MyHeritage all-records search: ${first} ${p.surname}${by != null ? `, born ${by}` : ""}${dy != null ? `, died ${dy}` : ""}. (The native MyHeritage search link was not found on this page, so this search is built from the tree's vitals.)` });
+        url: mhUrl(MH_MASTER, p, p.surname, true, null, base),
+        tooltip: `${brand} all-records search: ${first} ${p.surname}${by != null ? `, born ${by}` : ""}${dy != null ? `, died ${dy}` : ""}. (The native ${brand} search link was not found on this page, so this search is built from the tree's vitals.)` });
     }
     // All records — maiden + each married surname (post-death marriages dropped).
     const names = [p.surname];
@@ -2384,12 +2417,12 @@
         const married = sn !== p.surname ? " (married surname)" : "";
         if (country) {
           out.push({ group: "All records", label: `${country} — ${first} ${sn}${lived}`,
-            url: mhUrl(MH_MASTER, p, sn, true, country),
-            tooltip: `MyHeritage all-records search within ${country}: ${first} ${sn}${vitals}.${married} ${country} is sent as the place of an "any" event with similar-place matching, so MyHeritage keeps the search within it instead of the whole world — offered because this person's places touch ${country}.` });
+            url: mhUrl(MH_MASTER, p, sn, true, country, base),
+            tooltip: `${brand} all-records search within ${country}: ${first} ${sn}${vitals}.${married} ${country} is sent as the place of an "any" event with similar-place matching, so MyHeritage keeps the search within it instead of the whole world — offered because this person's places touch ${country}.` });
         } else {
           out.push({ group: "All records", label: `Worldwide — ${first} ${sn}${lived}`,
-            url: mhUrl(MH_MASTER, p, sn, true),
-            tooltip: `MyHeritage all-records search, worldwide: ${first} ${sn}${vitals}.${married} (No place on this page classifies to a country MyHeritage can be told, so the search is not narrowed.)` });
+            url: mhUrl(MH_MASTER, p, sn, true, null, base),
+            tooltip: `${brand} all-records search, worldwide: ${first} ${sn}${vitals}.${married} (No place on this page classifies to a country MyHeritage can be told, so the search is not narrowed.)` });
         }
       }
     }
@@ -2404,16 +2437,22 @@
       const sn = surnameAt(p, c.year);
       const title = censusTitle(c);
       out.push({ group: "Census", label: `${title} — ${first} ${sn}`,
-        url: mhUrl(`/${path}${MH_MASTER}`, p, sn, true),
-        tooltip: `MyHeritage ${title}: ${first} ${sn}${vitals}.${sn !== p.surname ? " (married surname of that year)" : ""} The search is restricted to that one collection.` });
+        url: mhUrl(`/${path}${MH_MASTER}`, p, sn, true, null, base),
+        tooltip: `${brand} ${title}: ${first} ${sn}${vitals}.${sn !== p.surname ? " (married surname of that year)" : ""} The search is restricted to that one collection.` });
     }
+    if (cfg.trees === false) return out; // the Library Edition holds records only
     // Family trees — the Smart Matches well; maiden name (trees index women by birth name).
     out.push({ group: "Family trees", label: `Family Trees — ${first} ${p.surname}${lived}`,
-      url: mhUrl(MH_TREES, p, p.surname, true), // no country — one worldwide collection
+      url: mhUrl(MH_TREES, p, p.surname, true, null, base), // no country — one worldwide collection
       tooltip: `MyHeritage Family Trees (collection 1) — other members' trees holding a ${first} ${p.surname}${lived}: the Smart Matches well, strong on European trees.` });
     return out;
   }
   FSSE.mhOptions = mhOptions; // exposed for tests
+  // v1.0.4 — the FamilySearch Center menu: the same list on the Library Edition's host (FS's own
+  // link there has no "www"), without the Family Trees entry.
+  const MH_LIBRARY = { site: "mh-library", base: "https://myheritagelibraryedition.com/research", brand: "MyHeritage Library Edition", trees: false };
+  const mhLibraryOptions = (p) => mhOptions(p, MH_LIBRARY);
+  FSSE.mhLibraryOptions = mhLibraryOptions; // exposed for tests
 
   // ---- Findmypast Records (the "Findmypast Records" menu, v0.2.62) -----------------------------
   // The native Findmypast row is HIDDEN since v0.2.104 (its search = this menu's leading "All
@@ -2724,6 +2763,33 @@
       options: ancestryOptions,
     },
     {
+      // Ancestry Institution (v1.0.4) — a FamilySearch CENTER row. On a center's network
+      // FamilySearch lists a second Ancestry row, "Ancestry Institution": the edition a center's
+      // patrons use without an Ancestry account of their own (Kevin's find at the Boise FSC,
+      // 2026-11-04 — FS's link there is its Ancestry link verbatim on www.ancestryinstitution.com).
+      // This menu takes that row's place exactly as "Ancestry ▸" takes the native Ancestry row's:
+      // the same content-aware list, every URL on the institution host, the row's own link as the
+      // first entry. The row's PRESENCE is the signal — `applies` holds only while FamilySearch
+      // shows it (content.js writes p.nativeRows[site.id] before it asks), so the menu appears
+      // nowhere else and nothing has to detect a center. Both Ancestry menus stand side by side
+      // there: a patron with an account keeps ancestry.com, one without uses this one.
+      id: "ancestry-institution",
+      label: "Ancestry Institution",
+      replaces: ["Ancestry Institution"],
+      anchorLabel: "Ancestry Institution",
+      position: "after",
+      applies: (p) => nativeRowOf(p, "ancestry-institution"),
+      describe(p) {
+        const opts = ancestryInstitutionOptions(p);
+        const countries = ancestryCountries(p).map((c) => c.country);
+        return `Ancestry Institution — click to list ${opts.length} pre-filled searches on ancestryinstitution.com for ${p.fullName || "this person"}` +
+          (countries.length ? `, focused on ${countries.join(" + ")}` : "") +
+          ((p.marriedSurnames || []).length ? ` (maiden + married name searches)` : "") +
+          ". The institution edition opens on a FamilySearch Center's network without an Ancestry account of your own.";
+      },
+      options: ancestryInstitutionOptions,
+    },
+    {
       // FreeBMD (v0.2.47): volunteer transcriptions of the E&W GRO civil-registration indexes,
       // Sep 1837 onward. Shown only for people with an E&W birth/marriage/death that the index
       // can cover. Entries open the FreeBMD search page with the parameters in the URL fragment;
@@ -2874,6 +2940,26 @@
         return `MyHeritage — click to list ${opts.length} pre-filled MyHeritage search${opts.length === 1 ? "" : "es"} for ${p.fullName || "this person"}: All Collections (MyHeritage's own search, as the native entry ran it), the all-records search${(() => { const c = mhCountries(p); return c.length ? ` within ${c.join(" / ")}` : ""; })()}${(() => { const n = opts.filter((o) => o.group === "Census").length; return n ? `, ${n} census${n === 1 ? "" : "es"}` : ""; })()}${(p.marriedSurnames || []).length ? " (maiden + married names)" : ""} and Family Trees (the Smart Matches well).`;
       },
       options: mhOptions,
+    },
+    {
+      // MyHeritage Library Edition (v1.0.4) — the other FamilySearch CENTER row (see
+      // "ancestry-institution" above): FamilySearch lists it beside MyHeritage on a center's
+      // network, and its link is our master-form grammar on myheritagelibraryedition.com. This
+      // menu takes that row's place: the row's own link first (FamilySearch builds it at click
+      // time with a token, so the click is handed over), then the all-records search per country
+      // and the census group on the Library Edition's host. No Family Trees entry — the Library
+      // Edition holds records only. Shown only while FamilySearch shows the native row.
+      id: "mh-library",
+      label: "MyHeritage Library Edition",
+      replaces: ["MyHeritage Library Edition"],
+      anchorLabel: "MyHeritage Library Edition",
+      position: "after",
+      applies: (p) => nativeRowOf(p, "mh-library"),
+      describe(p) {
+        const opts = mhLibraryOptions(p);
+        return `MyHeritage Library Edition — click to list ${opts.length} pre-filled search${opts.length === 1 ? "" : "es"} on myheritagelibraryedition.com for ${p.fullName || "this person"}: All Collections (the Library Edition's own search, as the native entry ran it), the all-records search${(() => { const c = mhCountries(p); return c.length ? ` within ${c.join(" / ")}` : ""; })()}${(() => { const n = opts.filter((o) => o.group === "Census").length; return n ? ` and ${n} census${n === 1 ? "" : "es"}` : ""; })()}${(p.marriedSurnames || []).length ? " (maiden + married names)" : ""}. The Library Edition opens on a FamilySearch Center's network without a MyHeritage account; it holds records only, no family trees.`;
+      },
+      options: mhLibraryOptions,
     },
     {
       // Findmypast Records (v0.2.62): the native Findmypast row is untouched; this menu adds

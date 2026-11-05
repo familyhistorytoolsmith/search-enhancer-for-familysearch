@@ -358,4 +358,45 @@ check("Ancestry and MyHeritage keep the indexed 1950 US census", FSSE.SITES.find
   check("settings: nothing stored → every Findmypast URL on findmypast.com as before", fmp.options(doris).every((x) => /^https:\/\/www\.findmypast\.com\//.test(x.url)) && FSSE.findmypastHost() === "https://www.findmypast.com");
 }
 
+// 19. v1.0.4 — the FamilySearch CENTER menu "MyHeritage Library Edition" (Kevin's find at the Boise
+//     FSC, 2026-11-04: on a center's network FamilySearch lists a second MyHeritage row whose link is
+//     the master-form grammar on myheritagelibraryedition.com, built at click time with a token).
+//     The MyHeritage menu's list on that host — the native row's own link first, the all-records
+//     searches per country, the censuses — WITHOUT Family Trees (the Library Edition is records
+//     only); shown only while FamilySearch shows the row. Findmypast needs no such menu: its
+//     link stays on findmypast.com at a center.
+{
+  const le = FSSE.SITES.find((s) => s.id === "mh-library");
+  const LE = "https://myheritagelibraryedition.com/research";
+  const WWW = "https://www.myheritage.com/research";
+  const fscLink = LE + "?formId=master&formMode=1&action=query&exactSearch=0&useTranslation=1&catId=1&qname=Name+fn.Mary+ln.Cullum+fnmo.1&qevents-event1=Event+et.birth+ey.1891+epmo.similar&qevents=List&csrf_token=1762300000.abc";
+  check("registry: mh-library replaces and anchors on the native 'MyHeritage Library Edition' row, native logo, listed right after mh-records",
+    !!le && le.label === "MyHeritage Library Edition" && JSON.stringify(le.replaces) === JSON.stringify(["MyHeritage Library Edition"]) && le.anchorLabel === "MyHeritage Library Edition" && le.position === "after" && !le.icon && FSSE.SITES.indexOf(le) === FSSE.SITES.indexOf(mh) + 1);
+  check("applies: only while FamilySearch lists the native row — never on an ordinary network", le.applies(mary) === false && le.applies({ ...mary, nativeRows: { "mh-records": true } }) === false && le.applies({ ...mary, nativeRows: { "mh-library": true } }) === true);
+  const fscMary = { ...mary, nativeRows: { "mh-records": true, "mh-library": true } };
+  let lo = le.options(fscMary);
+  check("Mary at a center: the hand-over entry, then the Australia search = Kevin's verified URL on the Library Edition's host; no Family Trees entry",
+    lo.map((x) => x.label).join(" | ") === "All Collections — Mary Cullum (1891–1956) | Australia — Mary Cullum (1891–1956)" && lo[1].url === kevinUrl.replace(WWW, LE) && !lo.some((x) => x.group === "Family trees"), lo.map((x) => `${x.label} → ${x.url}`).join(" | "));
+  check("hand-over: nativeClick; the reserve is our worldwide search on the Library Edition's host; the tooltip names the Library Edition",
+    lo[0].nativeClick === true && lo[0].url.startsWith(LE + "?s=1&formId=master") && !/et\.any/.test(lo[0].url) && /FamilySearch's own MyHeritage Library Edition entry \(hidden behind this menu\)/.test(lo[0].tooltip) && lo.filter((x) => x.nativeClick).length === 1, lo[0].url + " || " + lo[0].tooltip);
+  check("a readable link on the row is the reserve, keyed by ITS site id — the MyHeritage row's link never leaks in",
+    le.options({ ...fscMary, nativeUrls: { "mh-records": mhNative, "mh-library": fscLink } })[0].url === fscLink && le.options({ ...fscMary, nativeUrls: { "mh-records": mhNative } })[0].url !== mhNative && mh.options({ ...fscMary, nativeUrls: { "mh-records": mhNative, "mh-library": fscLink } })[0].url === mhNative);
+  // Entry for entry against the MyHeritage menu (a married woman with censuses).
+  const a = mh.options({ ...doris, nativeRows: { "mh-records": true } }).filter((x) => x.group !== "Family trees");
+  lo = le.options({ ...doris, nativeRows: { "mh-library": true } });
+  console.log("Library Edition:", lo.map((x) => x.label).join(" | "));
+  check("the MyHeritage menu's list minus Family Trees: same groups and labels, every URL moved to myheritagelibraryedition.com",
+    lo.length === a.length && lo.length > 4 && JSON.stringify(lo.map((x) => [x.group, x.label])) === JSON.stringify(a.map((x) => [x.group, x.label])) && lo.every((x, i) => x.url === a[i].url.replace(WWW, LE)) && lo.every((x) => x.url.startsWith(LE)),
+    lo.filter((x) => !x.url.startsWith(LE)).map((x) => x.url).join(" | "));
+  check("groups: All records · Census — never Family trees", JSON.stringify([...new Set(lo.map((x) => x.group))]) === JSON.stringify(["All records", "Census"]));
+  lo = le.options({ ...usCharles, nativeRows: { "mh-library": true } }).filter((x) => x.group === "Census");
+  check("census on the Library Edition: the collection path + the master query on its host (1850 US = collection-10126)",
+    lo[0].label === "1850 US Federal Census — Charles Bellwood" && lo[0].url === LE + "/collection-10126/1850-united-states-federal-census?s=1&formId=master&formMode=1&useTranslation=1&exactSearch=&p=1&action=query&view_mode=card&qname=Name+fn.Charles+fnmo.1+ln.Bellwood+lnmsrs.false+g.M&qevents-event1=Event+et.birth+ey.1805&qevents-any/1event_1=Event+et.death+ey.1879&qevents=List", lo[0] && lo[0].url);
+  lo = le.options({ id: "X", spouses: [], marriedSurnames: [], nativeRows: { "mh-library": true } });
+  check("row present, name not scraped yet: the hand-over entry alone, the Library Edition's search page as the reserve", lo.length === 1 && lo[0].label === "All Collections" && lo[0].nativeClick === true && lo[0].url === LE, JSON.stringify(lo));
+  check("the MyHeritage menu is untouched by its neighbour: still on www.myheritage.com, Family Trees last", (() => { const m = mh.options(fscMary); return m.every((x) => x.url.startsWith(WWW)) && m.at(-1).group === "Family trees"; })());
+  check("describe: names the host, the count and what the edition lacks", /^MyHeritage Library Edition — click to list 2 pre-filled searches on myheritagelibraryedition\.com for Mary Cullum: .*the all-records search within Australia\. The Library Edition opens on a FamilySearch Center's network without a MyHeritage account; it holds records only, no family trees\.$/.test(le.describe(fscMary)) && /within England and 3 censuses \(maiden \+ married names\)\./.test(le.describe({ ...doris, nativeRows: { "mh-library": true } })), le.describe(fscMary));
+  check("FSSE.mhLibraryOptions is the menu's builder", JSON.stringify(FSSE.mhLibraryOptions(fscMary)) === JSON.stringify(le.options(fscMary)));
+}
+
 process.exit(fails ? 1 : 0);

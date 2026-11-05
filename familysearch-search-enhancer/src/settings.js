@@ -64,6 +64,8 @@
   const GROUPS = [
     { id: "menus", title: "Search Records menus", intro: "These four menus stand in for FamilySearch's own row for that site. Untick one to get the standard row back.", columns: 2 },
     { id: "extra", title: "Extra menus", intro: "Shown only when the person's places fit the site.", columns: 2 },
+    // v1.0.4 — the two rows FamilySearch adds on a FamilySearch Center's network (Kevin's find, 2026-11-04).
+    { id: "center", title: "FamilySearch Center menus", intro: "FamilySearch lists these two rows only on a FamilySearch Center's network, where they open without an account of your own. Each menu stands in for that row; untick one to get the standard row back.", columns: 2 },
     { id: "pins", title: "Map pins 📍", intro: "A small \"📍 map\" link after each place; a click locates it and opens Google Maps in one reused tab." },
     { id: "dqs", title: "Quality Score" },
     { id: "temple", title: "Temple menu", intro: "For signed-in church members: four links after \"Ordinances Ready\" in the Temple menu (the fourth is a FamilySearch Labs experiment). Untick any FamilySearch starts offering itself." },
@@ -85,7 +87,9 @@
     { key: "site.rootsireland", group: "extra", label: "RootsIreland", hint: "County-centre and all-Ireland quick searches (free counts).", default: true },
     { key: "site.irishgenealogy", group: "extra", label: "IrishGenealogy", hint: "Ireland's free civil and church register indexes with images.", default: true },
     { key: "site.newspapers", group: "extra", label: "Newspapers", hint: "Newspapers.com, OldNews, GenealogyBank, Chronicling America, Findmypast newspapers, Trove, Papers Past.", default: true },
-    { key: "host.ancestry", group: "hosts", label: "Ancestry", hint: "Every Ancestry link this extension builds uses this site.", type: "select", default: "ancestry.com", choices: ANCESTRY_HOSTS },
+    { key: "site.ancestry-institution", group: "center", label: "Ancestry Institution", hint: "The Ancestry menu's searches on ancestryinstitution.com.", default: true },
+    { key: "site.mh-library", group: "center", label: "MyHeritage Library Edition", hint: "All-records searches per country and censuses on myheritagelibraryedition.com (records only, no family trees).", default: true },
+    { key: "host.ancestry", group: "hosts", label: "Ancestry", hint: "Every Ancestry link this extension builds uses this site (the Ancestry Institution menu always uses ancestryinstitution.com).", type: "select", default: "ancestry.com", choices: ANCESTRY_HOSTS },
     { key: "host.findmypast", group: "hosts", label: "FindMyPast", hint: "Every Findmypast link this extension builds — the Newspapers menu's Findmypast entries too — uses this site.", type: "select", default: "findmypast.com", choices: FINDMYPAST_HOSTS },
     { key: "pins.person", group: "pins", label: "Person page", hint: "Details, Family Members and Other Information places.", default: true },
     { key: "pins.sources", group: "pins", label: "Sources tab", hint: "The place fields of an expanded record's indexed information.", default: true },

@@ -20,7 +20,7 @@ from reportlab.pdfgen import canvas
 HERE = os.path.dirname(os.path.abspath(__file__))
 OUT = sys.argv[1] if len(sys.argv) > 1 else os.path.join(HERE, "docs", "feature-guide.pdf")  # served by GitHub Pages
 ICONS = os.path.join(HERE, "familysearch-search-enhancer", "icons")
-VERSION = "1.0.3"
+VERSION = "1.0.4"
 
 # ---------- fonts ----------
 F = r"C:\Windows\Fonts"
@@ -417,6 +417,20 @@ story += block(heading("Temple menu links (signed-in church members only)"), [
      "list whose other members still need ordinances. While the experiment is off for your account, the click first offers to "
      "turn it on through FamilySearch\u2019s own Labs page; Shift+click opens the Labs page."],
     "Accounts without a Temple menu are unaffected.",
+])
+
+# --- At a FamilySearch Center (1.0.4): two more Search Records menus, only where FamilySearch lists the rows
+story += section("At a FamilySearch Center")
+story += bullets([
+    "On a FamilySearch Center’s network FamilySearch itself lists two more rows in Search Records: <i>Ancestry Institution</i> "
+    "and <i>MyHeritage Library Edition</i>, the editions a center’s patrons can use without an account of their own. Where "
+    "those rows are shown, each becomes a menu as well; away from a center neither exists, so neither menu appears.",
+    "<b>Ancestry Institution " + TRI + "</b> — the same list as the Ancestry menu (All Collections, the country searches, "
+    "Census, Civil records, Parish records, Public Member Trees) with every search on ancestryinstitution.com.",
+    "<b>MyHeritage Library Edition " + TRI + "</b> — All Collections, the all-records search per country and the censuses on "
+    "myheritagelibraryedition.com. No Family Trees entry: the Library Edition holds records only.",
+    "The ordinary Ancestry and MyHeritage menus stay beside them for patrons with accounts of their own. Findmypast needs no "
+    "twin — its ordinary link opens without a personal login on a center’s network.",
 ])
 
 story += section("Good to know")

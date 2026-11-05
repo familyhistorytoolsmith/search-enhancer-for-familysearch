@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "Search Enhancer for FamilySearch",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "minimum_chrome_version": "111",
   "description": "Unofficial. Pre-filled record searches (Ancestry, MyHeritage, Findmypast, FreeBMD, GRO and more) on FamilySearch person pages.",
   "homepage_url": "https://familyhistorytoolsmith.github.io/search-enhancer-for-familysearch/",

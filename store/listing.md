@@ -17,10 +17,11 @@ Facts behind the choices (read off Google's dashboard docs 2026-10-30) are in CL
 
 ## Package tab
 
-Upload `search-enhancer-for-familysearch-v1.0.3.zip`, built by `build-store-zip.ps1` at the repo root
-(the same build the GitHub Release carries; a later version works the same way)
-(manifest.json at the zip root; the script checks that). The dashboard reads the title, summary, version
-and icons from the manifest inside.
+Upload the newest `search-enhancer-for-familysearch-v<version>.zip`, built by `build-store-zip.ps1` at the
+repo root (manifest.json at the zip root; the script checks that) — the same file a GitHub Release
+carries. Newest: `search-enhancer-for-familysearch-v1.0.4.zip` (2026-11-05, on Release v1.0.4 — adds the
+two FamilySearch Center menus). The dashboard reads the title, summary, version and icons from the
+manifest inside.
 
 ---
 
@@ -46,6 +47,8 @@ WHAT IT ADDS TO THE SEARCH RECORDS LIST
 • FamilySearch ▸ — every FamilySearch collection search that fits the person: censuses, birth / marriage / death indexes, passenger lists, military records, Full-Text Search, all collections. Each entry carries the person's tree ID, so the results page shows who you are searching for. Searches whose collection is already attached to the person are ticked.
 
 • Ancestry ▸, MyHeritage ▸, Findmypast ▸ — the site's own search for the person first (exactly as FamilySearch's standard row runs it), then searches scoped to the countries the person lived in, the censuses, civil and parish records, and member trees.
+
+• At a FamilySearch Center — where FamilySearch lists its Ancestry Institution and MyHeritage Library Edition rows, each becomes a menu too, with the same searches on the editions a center's patrons can use without an account of their own.
 
 • FreeBMD ▸ and GRO Index ▸ — the England & Wales civil birth, marriage and death indexes, free; the site's search form is filled and submitted for you.
 
@@ -87,8 +90,8 @@ as Google's icon guidance asks; the manifest keeps the unpadded icons).
 1. READY (2026-11-03): `screenshot-1-search-records-before-after.png` — the Search Records panel before and after, side by side (Mary Ann Bellwood MPRH-2W3, 1833–1907), the FamilySearch ▸ menu open with its CENSUS and BIRTH groups and the ✓ already-attached marks; built by `python make-store-screenshots.py 2.1 store/captures/2.1-before.jpg store/captures/2.1-after.jpg` at the repo root;
 2. READY (2026-11-03): `screenshot-2-partner-menus.png` — two partner menus side by side: Findmypast ▸ open on Doris Marjorie Withers LHWF-ZSP (1902–1980; the whole card, so the FamilySearch / Ancestry / MyHeritage rows show every partner row is a menu; ALL RECORDS · CENSUS · CIVIL RECORDS · PARISH RECORDS with her maiden / married split) and Ancestry ▸ open on George Wilson Stephenson MPRC-39D (1832–1889; the same groups plus FAMILY TREES); `python make-store-screenshots.py 2.2 store/captures/2.2-findmypast.jpg store/captures/2.2-ancestry.jpg`;
 3. READY (2026-11-03): `screenshot-3-gro-index.png` — the GRO Index ▸ menu open on Doris Marjorie Withers ("GRO births — 1902 ±2"), what the click does beside it, and the gro.gov.uk results strip the click produced across the bottom (one record, mother's maiden surname MILNER); `python make-store-screenshots.py 2.3 store/captures/2.3-gro-menu.jpg store/captures/2.3-gro-results.jpg` (the checklist proposed FreeBMD too — the site was down when the captures were taken);
-4. the Source Linker with a "📍 compare" pair and the two-pin map page it opens (Florence May Brain P6QN-SGS, Kingswood ↔ Warmley), or the person page with "📍 map" after every place;
-5. the Quality Score tooltip (Thomas Gourley Park GJJ3-YGN) and the settings page.
+4. READY (2026-11-05): `screenshot-4-source-linker-map.png` — the Source Linker's Birth row with a "📍 compare" link on each side (the record attached to Doris Marjorie Withers LHWF-ZSP, Parents section: Mabel Vithers, "Dalston, London, England", against the tree's Mabel Milner LHWF-ZSS, 1879–1957, "Islington, Middlesex, England, United Kingdom") across the top, and below it the map page the click opened: its header (A Dalston · 1.1 mi straight line · B Islington) over a window onto Google's embedded map with the route; `python make-store-screenshots.py 2.4 store/captures/2.4-linker.jpg store/captures/2.4-map.jpg`;
+5. READY (2026-11-05): `screenshot-5-quality-score-settings.png` — left, the Research Help card of Mary Ann Bellwood MPRH-2W3 with the tooltip open under the Medium badge ("Quality score 80.4 · Medium", the thresholds, "Scored as: United Kingdom 1800 – 1920", the To reach High list) and three lines on what it adds; right, the settings popup from its header through Search Records menus, Extra menus and Map pins, fading out in the Quality Score group; `python make-store-screenshots.py 2.5 store/captures/2.5-tooltip.jpg store/captures/2.5-settings.jpg`. The settings capture is of build 1.0.1: its version label is painted out, and the Temple menu group (which gained a fourth link in 1.0.2) is below the crop. Since 1.0.4 the page has one more group — FamilySearch Center menus, between Extra menus and Map pins — which this image does not show; a fresh capture of the top of the popup on the current build, plus one re-run of the command, brings it up to date.
 
 **Promo tiles** (optional — both READY in this folder): small `promo-tile-440x280.png` (440 × 280), marquee
 `marquee-1400x560.png` (1400 × 560). Upload them on the Listing tab under the promo-tile fields. Regenerate with

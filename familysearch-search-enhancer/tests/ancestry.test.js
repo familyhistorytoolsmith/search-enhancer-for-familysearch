@@ -258,4 +258,42 @@ check("settings: nothing stored → ancestry.com as before", opts(doris).every((
 delete FSSE.settings;
 check("no settings object at all → ancestry.com", FSSE.ancestryHost() === "https://www.ancestry.com" && opts(doris).every((x) => /^https:\/\/www\.ancestry\.com\//.test(x.url)));
 
+// 14. v1.0.4 — the FamilySearch CENTER menu "Ancestry Institution" (Kevin's find at the Boise FSC,
+//     2026-11-04: on a center's network FamilySearch lists a second Ancestry row whose link is its
+//     Ancestry link verbatim on www.ancestryinstitution.com). The same list as the Ancestry menu on
+//     that host, the native row's own link first, shown only while FamilySearch shows the row.
+const inst = FSSE.SITES.find((s) => s.id === "ancestry-institution");
+const FSC_URL = "https://www.ancestryinstitution.com/search?name=Charles+Richard_Hardie&birth=1906_Midland+Junction-Western+Australia-Australia&death=1988_Scarborough-Western+Australia-Australia&father=Thomas+Charles_Hardie&gender=m&marriage=1932_Western+Australia-Australia&mother=Hilda_Delaporte&spouse=Gladys+May_Cummings";
+check("registry: ancestry-institution replaces and anchors on the native 'Ancestry Institution' row, native logo, listed right after ancestry-records",
+  !!inst && inst.label === "Ancestry Institution" && JSON.stringify(inst.replaces) === JSON.stringify(["Ancestry Institution"]) && inst.anchorLabel === "Ancestry Institution" && inst.position === "after" && !inst.icon && FSSE.SITES.indexOf(inst) === FSSE.SITES.indexOf(site) + 1);
+check("applies: only while FamilySearch lists the native row — never on an ordinary network", inst.applies(doris) === false && inst.applies({ ...doris, nativeRows: { "ancestry-records": true } }) === false && inst.applies({ ...doris, nativeRows: { "ancestry-institution": false } }) === false && inst.applies({ ...doris, nativeRows: { "ancestry-institution": true } }) === true);
+const fsc = { ...doris, nativeRows: { "ancestry-records": true, "ancestry-institution": true }, nativeUrls: { "ancestry-records": nativeUrl, "ancestry-institution": FSC_URL } };
+const io = inst.options(fsc);
+const ao = site.options(fsc);
+console.log("Institution:", io.map((x) => x.label).join(" | "));
+check("the same list as the Ancestry menu: groups and labels identical, entry for entry", io.length > 10 && JSON.stringify(io.map((x) => [x.group, x.label])) === JSON.stringify(ao.map((x) => [x.group, x.label])), io.map((x) => x.label).join(" | "));
+check("first entry: the Ancestry Institution row's OWN link, the click handed to it — keyed by its own site id, not the Ancestry row's",
+  io[0].label === "All Collections — Doris Annie Hiscocks (1897–1980)" && io[0].nativeClick === true && io[0].url === FSC_URL && ao[0].url === nativeUrl && /FamilySearch's own Ancestry Institution entry \(hidden behind this menu\)/.test(io[0].tooltip) && /so Ancestry Institution receives exactly what FamilySearch sends/.test(io[0].tooltip), io[0].url + " || " + io[0].tooltip);
+check("every other entry = the Ancestry menu's URL moved to www.ancestryinstitution.com (country, census, civil, parish, trees)",
+  io.slice(1).every((x, i) => x.url === ao[i + 1].url.replace("https://www.ancestry.com/", "https://www.ancestryinstitution.com/")) && io.slice(1).every((x) => x.url.startsWith("https://www.ancestryinstitution.com/search/")),
+  io.slice(1).filter((x) => !x.url.startsWith("https://www.ancestryinstitution.com/search/")).map((x) => x.url).join(" | "));
+check("byte-exact on the institution host: the England maiden search, the 1911 census set, Public Member Trees",
+  io[1].url === "https://www.ancestryinstitution.com/search/?name=Doris+Annie_Hiscocks&birth=1897&death=1980&gender=f&priority=english" &&
+  io.find((x) => /^1911 England Census/.test(x.label)).url === "https://www.ancestryinstitution.com/search/collections/2352/?name=Doris+Annie_Hiscocks&birth=1897_Fishponds-Gloucestershire-England&gender=f" &&
+  io.at(-1).label === "Public Member Trees" && io.at(-1).url === "https://www.ancestryinstitution.com/search/collections/1030/?name=Doris+Annie_Hiscocks&birth=1897&death=1980",
+  [io[1].url, io.at(-1).url].join(" | "));
+check("only the hand-over entry carries nativeClick", io.filter((x) => x.nativeClick).length === 1);
+const instRow = inst.options({ ...doris, nativeRows: { "ancestry-institution": true } })[0];
+check("row present but no readable link: the click is still handed over; the reserve is our global search on the institution host",
+  instRow.nativeClick === true && instRow.url === "https://www.ancestryinstitution.com/search/?name=Doris+Annie_Hiscocks&birth=1897&death=1980&gender=f", instRow.url);
+check("row present, name not scraped yet: the bare institution search as the reserve",
+  (() => { const e = inst.options({ id: "X", spouses: [], marriedSurnames: [], spouseSurnames: [], nativeRows: { "ancestry-institution": true } })[0]; return e.label === "All Collections" && e.nativeClick === true && e.url === "https://www.ancestryinstitution.com/search/"; })());
+check("the Ancestry menu is untouched by its neighbour: still every URL on www.ancestry.com", ao.slice(1).every((x) => x.url.startsWith("https://www.ancestry.com/")) && JSON.stringify(ao.slice(1).map((x) => x.url)) === JSON.stringify(site.options({ ...doris, nativeRows: { "ancestry-records": true }, nativeUrls: { "ancestry-records": nativeUrl } }).slice(1).map((x) => x.url)));
+check("describe: names the host, counts the entries, says why it is there", new RegExp("^Ancestry Institution — click to list " + io.length + " pre-filled searches on ancestryinstitution\\.com for Doris Annie Hiscocks, focused on England \\(maiden \\+ married name searches\\)\\. The institution edition opens on a FamilySearch Center's network without an Ancestry account of your own\\.$").test(inst.describe(fsc)), inst.describe(fsc));
+FSSE.settings = { loaded: true, get: (k) => (k === "host.ancestry" ? "ancestry.co.uk" : undefined) };
+check("the regional setting moves the Ancestry menu only — the institution menu stays on ancestryinstitution.com",
+  site.options(fsc).slice(1).every((x) => x.url.startsWith("https://www.ancestry.co.uk/")) && inst.options(fsc).slice(1).every((x) => x.url.startsWith("https://www.ancestryinstitution.com/")));
+delete FSSE.settings;
+check("FSSE.ancestryInstitutionOptions is the menu's builder", JSON.stringify(FSSE.ancestryInstitutionOptions(fsc)) === JSON.stringify(io));
+
 process.exit(fails ? 1 : 0);
