@@ -230,5 +230,48 @@ check("center, partner rows wrapped pairwise: each row is found on its own — h
   wAnc && wInst && wLe && wAnc.row.textContent === "Ancestry" && wInst.row.textContent === "Ancestry Institution" && wLe.row.textContent === "MyHeritage Library Edition" && wAnc.row !== wInst.row,
   JSON.stringify([wAnc && wAnc.row.textContent, wInst && wInst.row.textContent, wLe && wLe.row.textContent]));
 
+// ---- v1.0.5: does this page show its signed-in user a Temple menu? (the settings page's live
+// question — FamilySearch draws the Temple menu for church members only) -----------------------
+const navItem = (label) => el("li", [el("button", [el("span", [label]), el("svg", [])])]);
+const masthead = (labels, opts) => el("header", [el("a", [el("img", [])]), el("nav", [el("ul", labels.map(navItem))]), el("button", [el("span", ["Help"])])], opts);
+const NAV = ["Family Tree", "Search", "Memories", "Get Involved", "Activities"];
+const templeDropdown = (opts) => el("div", [el("ul", ["My Reservations", "Family Groups", "Shared with Temple", "Completed", "Ordinances Ready", "Family Name Assist", "Schedule Temple Appointment"].map(li))], opts);
+// The footer lists two of the Temple links for everyone — never enough for a dropdown copy.
+const footer = () => el("footer", [el("ul", ["My Reservations", "Ordinances Ready", "Reservation Policies", "Temple Appointments"].map(li))]);
+const state = (...kids) => {
+  globalThis.document = el("body", kids);
+  return FSSE.templeMenuState();
+};
+const mem = state(masthead([...NAV, "Temple"]), bigPageText());
+check("temple check: a member's masthead (Temple among the items) → true", mem.temple === true && /masthead/.test(mem.why), JSON.stringify(mem));
+check("temple check: a hidden copy of the Temple dropdown is enough, even with the masthead collapsed", state(masthead(NAV, { hidden: true }), templeDropdown({ hidden: true })).temple === true);
+check("temple check: the masthead collapsed (a narrow window) but a hidden 'Temple' item among its items → true", state(masthead([...NAV, "Temple"], { hidden: true }), bigPageText()).temple === true);
+const non = state(masthead(NAV), bigPageText(), footer());
+check("temple check: a signed-in masthead shown WITHOUT a Temple item → false (the footer's two Temple links do not count)", non.temple === false && /without a Temple/.test(non.why), JSON.stringify(non));
+check("temple check: a place or a surname reading 'Temple' elsewhere on a non-member's page changes nothing",
+  state(masthead(NAV), el("div", [el("div", [el("div", [el("div", [el("div", [el("div", [el("div", [el("div", [el("div", [el("span", ["Temple"])])])])])])])])])]), bigPageText()).temple === false);
+check("temple check: signed out ('Sign In' shown) → unknown, whatever the masthead lists",
+  state(masthead(NAV), el("button", [el("span", ["Sign In"])])).temple === null && state(masthead(["Overview", "Family Tree", "Search", "Memories"]), el("a", ["Create Account"])).temple === null);
+check("temple check: a hidden 'Sign In' (a closed dialog) does not make a signed-in page unknown", state(masthead(NAV), el("button", [el("span", ["Sign In"])], { hidden: true })).temple === false);
+check("temple check: the masthead collapsed and nothing of a Temple menu → unknown (never a false 'no')", state(masthead(NAV, { hidden: true }), bigPageText()).temple === null);
+check("temple check: fewer than three masthead items shown (a person page's own 'Memories' tab, a 'Search' button) → unknown",
+  state(el("div", [el("a", ["Memories"]), el("button", ["Search"])]), bigPageText()).temple === null);
+check("temple check: an empty page / another language → unknown", state().temple === null && state(masthead(["Arbre", "Rechercher", "Souvenirs", "Participer", "Activités"])).temple === null);
+check("temple check: the three-items test is local — items scattered more than eight levels apart are no masthead",
+  state(...["Family Tree", "Search", "Memories"].map((l) => el("div", [el("div", [el("div", [el("div", [el("div", [el("div", [el("div", [el("div", [el("div", [el("span", [l])])])])])])])])])]))).temple === null);
+// The message the settings page sends, and the answer a tab gives.
+globalThis.document = el("body", [masthead(NAV), bigPageText()]);
+const ans = FSSE.answerTempleQuery({ type: "FSSE_TEMPLE_QUERY" });
+check("answerTempleQuery: { temple } for the settings page's question — the bare verdict, nothing else about the page", ans && Object.keys(ans).join() === "temple" && ans.temple === false, JSON.stringify(ans));
+check("answerTempleQuery: any other message is not ours (undefined → no reply sent)", FSSE.answerTempleQuery({ type: "FSSE_OTHER" }) === undefined && FSSE.answerTempleQuery(null) === undefined && FSSE.TEMPLE_QUERY === "FSSE_TEMPLE_QUERY");
+globalThis.document = el("body", [masthead([...NAV, "Temple"])]);
+check("answerTempleQuery: read afresh on every question (the same tab, now a member's page → true)", FSSE.answerTempleQuery({ type: "FSSE_TEMPLE_QUERY" }).temple === true);
+// The dropdown finder shares the copy detection and keeps its gesture guard.
+FSSE._userGestureSeen = true;
+const openDd = templeDropdown();
+globalThis.document = el("body", [masthead([...NAV, "Temple"]), templeDropdown({ hidden: true }), openDd]);
+check("findTempleSection: unchanged — the SHOWN copy of the dropdown's list is picked among two", FSSE.findTempleSection() === openDd.children[0]);
+FSSE._userGestureSeen = false;
+
 console.log(fails ? `\n${fails} FAILURE(S)` : "\nALL PASS");
 process.exit(fails ? 1 : 0);

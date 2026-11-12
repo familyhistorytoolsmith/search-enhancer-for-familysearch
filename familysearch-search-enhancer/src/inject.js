@@ -332,15 +332,9 @@
     if (el.checkVisibility) return el.checkVisibility({ checkOpacity: true, checkVisibilityCSS: true, opacityProperty: true, visibilityProperty: true });
     return el.getClientRects().length > 0;
   };
-  FSSE.findTempleSection = function findTempleSection() {
-    if (!FSSE._userGestureSeen) {
-      if (findTempleSection._last !== "unarmed") {
-        findTempleSection._last = "unarmed";
-        FSSE.log("temple section: deferred until the first user interaction (header hydration guard)");
-      }
-      return null;
-    }
-    const els = deepElements(document);
+  // Every rendered copy of the Temple dropdown, shown or hidden: climb from each "Ordinances
+  // Ready" leaf to the smallest ancestor holding three of the menu's known labels.
+  function templeCopies(els) {
     const candidates = [];
     for (const el of els) {
       if (el.textContent.trim() !== "Ordinances Ready") continue;
@@ -353,6 +347,94 @@
         }
       }
     }
+    return candidates;
+  }
+
+  // v1.0.5 — does THIS page, right now, show its signed-in user a Temple menu? (Kevin, 2026-11-12:
+  // FamilySearch draws the Temple menu in the masthead for church members only, so the settings
+  // page can leave its Temple group out for everyone else — a community patron at a FamilySearch
+  // Center, say.) Read LIVE from the page on every question and NEVER stored: a computer shared by
+  // members and patrons must not remember who used it last, and the privacy policy stays as it is.
+  //   true  — a Temple menu is in the page: a copy of its dropdown (shown or hidden), or a
+  //           "Temple" item beside the masthead's other items;
+  //   false — the signed-in masthead is SHOWN (three of its items) and nothing of a Temple menu
+  //           is in the page, shown or hidden;
+  //   null  — cannot tell: signed out, still loading, the masthead collapsed (a narrow window),
+  //           another language. The settings page then shows the Temple group, as before v1.0.5.
+  // Every doubt resolves to "show": a wrong `false` would hide a member's own switches.
+  const MASTHEAD = ["Family Tree", "Search", "Memories", "Get Involved", "Activities"];
+  const SIGNED_OUT_RE = /^(sign in|create (a )?(free )?account)$/i;
+  FSSE.templeMenuState = function templeMenuState() {
+    const els = deepElements(document);
+    const done = (temple, why) => {
+      if (templeMenuState._last !== why) {
+        templeMenuState._last = why;
+        FSSE.log("temple menu check:", temple === null ? "unknown" : temple ? "Temple menu present" : "no Temple menu", "—", why);
+      }
+      return { temple, why };
+    };
+    if (templeCopies(els).length) return done(true, "a copy of the Temple dropdown is in the page");
+    // The smallest elements reading exactly one of the texts we care about.
+    const nav = []; // { el, label, shown }
+    const temple = [];
+    let signedOut = false;
+    for (const el of els) {
+      const t = el.textContent.trim();
+      if (!t || t.length > 24) continue;
+      const isNav = MASTHEAD.includes(t);
+      const isTemple = t === "Temple";
+      const isOut = SIGNED_OUT_RE.test(t);
+      if (!isNav && !isTemple && !isOut) continue;
+      if (Array.from(el.children).some((c) => c.textContent.trim() === t)) continue; // a wrapper of the leaf
+      if (isNav) nav.push({ el, label: t, shown: shown(el) });
+      else if (isTemple) temple.push(el);
+      else if (shown(el)) signedOut = true;
+    }
+    const labelsIn = (node, list) => new Set(list.filter((n) => node.contains(n.el)).map((n) => n.label)).size;
+    // A "Temple" item counts when it sits with the masthead's other items (a place or a surname
+    // "Temple" elsewhere on the page does not).
+    for (const t of temple) {
+      let node = t;
+      for (let i = 0; i < 8 && node.parentElement; i++) {
+        node = node.parentElement;
+        if (labelsIn(node, nav) >= 2) return done(true, '"Temple" sits among the masthead items');
+      }
+    }
+    if (signedOut) return done(null, "signed out");
+    const visible = nav.filter((n) => n.shown);
+    let masthead = false;
+    for (const n of visible) {
+      let node = n.el;
+      for (let i = 0; i < 8 && node.parentElement && !masthead; i++) {
+        node = node.parentElement;
+        if (labelsIn(node, visible) >= 3) masthead = true;
+      }
+      if (masthead) break;
+    }
+    if (!masthead) return done(null, "the signed-in masthead is not shown (loading, collapsed, or another language)");
+    return done(false, "the signed-in masthead is shown without a Temple item");
+  };
+  // The settings page's question, answered from the page as it is this instant (content.js wires
+  // it to chrome.runtime.onMessage). Returns undefined for any other message.
+  FSSE.TEMPLE_QUERY = "FSSE_TEMPLE_QUERY";
+  FSSE.answerTempleQuery = function answerTempleQuery(msg) {
+    if (!msg || msg.type !== FSSE.TEMPLE_QUERY) return undefined;
+    let temple = null;
+    try {
+      temple = FSSE.templeMenuState().temple;
+    } catch (_) {}
+    return { temple };
+  };
+
+  FSSE.findTempleSection = function findTempleSection() {
+    if (!FSSE._userGestureSeen) {
+      if (findTempleSection._last !== "unarmed") {
+        findTempleSection._last = "unarmed";
+        FSSE.log("temple section: deferred until the first user interaction (header hydration guard)");
+      }
+      return null;
+    }
+    const candidates = templeCopies(deepElements(document));
     if (!candidates.length) {
       if (findTempleSection._last !== "none") FSSE.log("temple section: not found (non-member account, or the menu is not rendered while closed)");
       findTempleSection._last = "none";

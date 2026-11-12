@@ -344,6 +344,18 @@
   // v1.0.2: the Labs state arriving (or changing in another tab) re-syncs too — the Temple
   // row's tooltip follows it.
   if (FSSE.labs && FSSE.labs.onChange) FSSE.labs.onChange(schedule);
+  // v1.0.5: the settings page asks every open FamilySearch tab whether its masthead shows a
+  // Temple menu (FSSE.templeMenuState) and leaves its Temple group out when none does. Answered
+  // from the page as it is at that moment; nothing is stored. An orphaned tab cannot answer —
+  // the settings page then treats it as "unknown" and shows the group.
+  try {
+    if (typeof chrome !== "undefined" && chrome.runtime && chrome.runtime.onMessage) {
+      chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
+        const answer = FSSE.answerTempleQuery(msg);
+        if (answer) sendResponse(answer);
+      });
+    }
+  } catch (_) {}
   // v0.2.67: arm the temple-row injection on the FIRST user gesture (see findTempleSection —
   // injecting into the header before React finished hydrating it duplicated the whole header
   // on /en/campaign/temple-tools; a gesture-opened dropdown proves hydration is done).

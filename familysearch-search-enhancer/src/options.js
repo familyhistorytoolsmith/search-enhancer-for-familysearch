@@ -8,6 +8,79 @@
 // Extension-page CSP: no inline script, no inline handlers — everything is wired here.
 
 (() => {
+  // ---- the live Temple-menu check (v1.0.5) ------------------------------------------------------
+  // FamilySearch shows the Temple menu to church members only, so the Temple group of this page
+  // means nothing to anyone else (Kevin, 2026-11-12 — a community patron at a FamilySearch Center).
+  // On opening, the page asks every open tab one question; only a FamilySearch tab running this
+  // extension answers, from its own masthead as it is at that moment (inject.js templeMenuState).
+  // NOTHING IS STORED — a computer shared by members and patrons must not remember who used it —
+  // and no permission is needed: tabs.query without the "tabs" permission returns the tab ids,
+  // which is all tabs.sendMessage wants.
+  //   any tab answers true  → show the group (a Temple menu was seen);
+  //   else any answers false → leave the group out (a signed-in masthead without a Temple menu);
+  //   no usable answer       → show the group (no FamilySearch tab, signed out, still loading…).
+  const TEMPLE_QUERY = "FSSE_TEMPLE_QUERY";
+  const TEMPLE_WAIT_MS = 400;
+  const templeVerdict = (answers) => {
+    let verdict = null;
+    for (const a of answers) {
+      if (a === true) return true;
+      if (a === false) verdict = false;
+    }
+    return verdict;
+  };
+  function askTemple(api, timeoutMs) {
+    return new Promise((resolve) => {
+      const answers = [];
+      let settled = false;
+      const finish = (v) => {
+        if (settled) return;
+        settled = true;
+        resolve(v);
+      };
+      let tabsApi = null;
+      try {
+        tabsApi = api && api.tabs;
+      } catch (_) {}
+      if (!tabsApi || typeof tabsApi.query !== "function" || typeof tabsApi.sendMessage !== "function") return finish(null);
+      setTimeout(() => finish(templeVerdict(answers)), timeoutMs == null ? TEMPLE_WAIT_MS : timeoutMs);
+      let asked;
+      try {
+        asked = Promise.resolve(tabsApi.query({}));
+      } catch (_) {
+        return finish(null);
+      }
+      asked
+        .then((tabs) =>
+          Promise.all(
+            (tabs || [])
+              .filter((t) => t && t.id != null)
+              .map((t) => {
+                let reply;
+                try {
+                  reply = Promise.resolve(tabsApi.sendMessage(t.id, { type: TEMPLE_QUERY }));
+                } catch (_) {
+                  return null; // no listener in that tab
+                }
+                return reply.then(
+                  (r) => {
+                    const a = r && typeof r === "object" ? r.temple : null;
+                    answers.push(a);
+                    if (a === true) finish(true); // one sighting settles it
+                  },
+                  () => {} // not a FamilySearch tab, or its script was orphaned by an update
+                );
+              })
+          )
+        )
+        .then(
+          () => finish(templeVerdict(answers)),
+          () => finish(null)
+        );
+    });
+  }
+  if (typeof module !== "undefined" && module.exports) module.exports = { TEMPLE_QUERY, templeVerdict, askTemple };
+
   const S = globalThis.FSSE && FSSE.settings;
   if (!S || typeof document === "undefined" || !document.getElementById) return;
   const $ = (id) => document.getElementById(id);
@@ -69,6 +142,15 @@
     return el("label", { class: "opt", for: box.id, title: s.hint || "" }, [box, text]);
   }
 
+  // The Temple group waits for the live check: "pending" (not drawn in yet) → "show" | "hide".
+  // It stays in the page either way, so Restore defaults and a second open copy still reach its
+  // switches; only its visibility follows the check.
+  let templeGate = "pending";
+  let templeSec = null;
+  const applyTempleGate = () => {
+    if (templeSec) templeSec.hidden = templeGate !== "show";
+  };
+
   function render() {
     const main = $("groups");
     main.textContent = "";
@@ -76,12 +158,14 @@
       const entries = S.SCHEMA.filter((s) => s.group === g.id);
       if (!entries.length) continue;
       const sec = el("section", {}, [el("h2", { text: g.title })]);
+      if (g.id === "temple") templeSec = sec;
       if (g.intro) sec.appendChild(el("p", { class: "intro", text: g.intro }));
       const grid = el("div", { class: "grid" + (g.columns === 2 ? " cols2" : "") });
       for (const s of entries) grid.appendChild(optionRow(s));
       sec.appendChild(grid);
       main.appendChild(sec);
     }
+    applyTempleGate();
     sync();
   }
   // Put the current values on the inputs (never rebuilds, so focus is never lost).
@@ -103,6 +187,14 @@
 
   S.ready.then(() => {
     render();
+    let api = null;
+    try {
+      api = typeof chrome !== "undefined" ? chrome : null;
+    } catch (_) {}
+    askTemple(api).then((seen) => {
+      templeGate = seen === false ? "hide" : "show";
+      applyTempleGate();
+    });
     S.onChange(sync); // our own writes echo back through storage.onChanged; a second open copy follows too
     let hasStore = false;
     try {

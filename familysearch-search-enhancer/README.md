@@ -354,9 +354,18 @@ Nothing on the FamilySearch page itself leads there — the menus stay search en
 | **FamilySearch Center menus** | Ancestry Institution · MyHeritage Library Edition | These two appear only where FamilySearch lists those rows — on a FamilySearch Center's network. Untick one and our menu goes, and FamilySearch's standard row comes back. |
 | **Map pins** | Person page · Sources tab · Source Linker | No 📍 links on that kind of page; any already shown disappear within a second. |
 | **Quality Score** | the tooltip | Hovering the badge shows only what FamilySearch shows. |
-| **Temple menu** | Temple Opportunities · Family Ordinance Opportunities · Remaining Temple Ordinances · Families with Remaining Ordinances | That link is not added (for the last one, no banner on its page either) — handy should FamilySearch start offering one of these tools itself. |
+| **Temple menu** | Temple Opportunities · Family Ordinance Opportunities · Remaining Temple Ordinances · Families with Remaining Ordinances | That link is not added (for the last one, no banner on its page either) — handy should FamilySearch start offering one of these tools itself. The whole group is left out of the settings page when an open, signed-in FamilySearch tab shows no Temple menu (see below). |
 | **Regional sites** | *Ancestry* — ancestry.com (default), ancestry.co.uk, .ca, .com.au, .de, .fr, .it, .se, .mx, or the library / FamilySearch Center editions; *FindMyPast* — findmypast.com (default), .co.uk, .ie, .com.au | Every Ancestry or Findmypast link **this extension builds** (the Newspapers menu's Findmypast entries included) opens on the chosen site — pick the one your subscription is on. The search grammar is the same on every regional site. FamilySearch's own *All Collections* entry still opens wherever FamilySearch sends it, and the *Ancestry Institution* menu always uses ancestryinstitution.com. |
 | **Advanced** | Console diagnostics | On: the extension's `[FSSE]` messages appear in the DevTools console (filter by `FSSE`) — turn it on to paste the lines into a bug report, off again afterwards. |
+
+**The Temple menu group appears only where it applies.** FamilySearch shows the Temple menu to
+church members only, so for everyone else those four switches mean nothing. Each time the
+settings page opens it asks the FamilySearch tabs that are open whether their top menu bar shows
+a Temple menu. If a signed-in FamilySearch tab shows none, the group is left out. If any tab
+shows one, or no FamilySearch tab can tell (none open, signed out, still loading, a narrow window
+that folds the menu bar away), the group is shown as usual. The answer is read from the page at
+that moment and is **not stored anywhere**, so a computer shared by members and other patrons —
+at a FamilySearch Center, say — never remembers who used it last.
 
 Changes apply at once; open FamilySearch tabs follow within a second, no reload needed.
 **Restore defaults** turns everything back on. The settings follow your Chrome profile

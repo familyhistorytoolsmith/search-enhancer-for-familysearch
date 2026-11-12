@@ -19,8 +19,9 @@ Facts behind the choices (read off Google's dashboard docs 2026-10-30) are in CL
 
 Upload the newest `search-enhancer-for-familysearch-v<version>.zip`, built by `build-store-zip.ps1` at the
 repo root (manifest.json at the zip root; the script checks that) — the same file a GitHub Release
-carries. Newest: `search-enhancer-for-familysearch-v1.0.4.zip` (2026-11-05, on Release v1.0.4 — adds the
-two FamilySearch Center menus). The dashboard reads the title, summary, version and icons from the
+carries. Newest: `search-enhancer-for-familysearch-v1.0.5.zip` (2026-11-12 — the settings page leaves
+the Temple menu group out for an account without a Temple menu; 1.0.4 added the two FamilySearch Center
+menus). The dashboard reads the title, summary, version and icons from the
 manifest inside.
 
 ---
