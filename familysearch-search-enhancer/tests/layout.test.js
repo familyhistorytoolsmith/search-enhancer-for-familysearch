@@ -28,8 +28,15 @@ function el(tag, kids, opts) {
       (function walk(x) { for (const c of x.children) { out.push(c); walk(c); } })(this);
       if (sel === "*") return out;
       if (sel === "a[href]") return out.filter((x) => x.tagName === "A" && x.href);
+      // v1.0.6: a tag list ("style, script, title, desc") and a bare attribute test ("[data-fsse-sim]").
+      if (/^[a-z]+(\s*,\s*[a-z]+)*$/.test(sel)) { const tags = sel.split(/\s*,\s*/); return out.filter((x) => tags.includes(x.tagName.toLowerCase())); }
+      const attr = /^\[([\w-]+)\]$/.exec(sel);
+      if (attr) return out.filter((x) => attr[1] in x._attrs);
       return [];
     },
+    get nextElementSibling() { const p = this.parentElement; if (!p) return null; return p.children[p.children.indexOf(this) + 1] || null; },
+    after(node) { const p = this.parentElement; node.remove(); node.parentElement = p; p.children.splice(p.children.indexOf(this) + 1, 0, node); },
+    remove() { const p = this.parentElement; if (!p) return; p.children.splice(p.children.indexOf(this), 1); this.parentElement = null; },
     contains(other) { for (let x = other; x; x = x.parentElement) if (x === this) return true; return false; },
     isShown() { for (let x = this; x; x = x.parentElement) if (x._hidden) return false; return true; },
     getBoundingClientRect() { return this.isShown() ? { width: 200, height: 24 } : { width: 0, height: 0 }; },
@@ -229,6 +236,61 @@ const wLe = FSSE.findNativeEntry(fscWrapped, ["MyHeritage Library Edition"]);
 check("center, partner rows wrapped pairwise: each row is found on its own — hiding 'Ancestry' never takes the institution row with it",
   wAnc && wInst && wLe && wAnc.row.textContent === "Ancestry" && wInst.row.textContent === "Ancestry Institution" && wLe.row.textContent === "MyHeritage Library Edition" && wAnc.row !== wInst.row,
   JSON.stringify([wAnc && wAnc.row.textContent, wInst && wInst.row.textContent, wLe && wLe.row.textContent]));
+
+// ---- v1.0.6: the rows as FamilySearch really draws them (its list-item component, read off the
+// bundle 2026-11-14): <li> › outer › inner[data-testid] › [logo cell › svg › <style>.ancestrySvg{…}</style>,
+// text cell › heading › row › cell "Ancestry Institution"]. The logo's inline CSS is part of the
+// row's textContent — Kevin's FamilySearch Center screenshots: "Ancestry Institution" + ".ancestrySvg"
+// counted as two entries, the row's inner container passed for the list, and the menu's panel
+// opened BESIDE its label inside FamilySearch's row.
+const CSS_OF = { FamilySearch: "", Ancestry: "ancestry", "Ancestry Institution": "ancestry", MyHeritage: "myHeritage", "MyHeritage Library Edition": "myHeritage", Findmypast: "findmypast", Geneanet: "geneanet", Storied: "storied", Filae: "filae", Google: "st0" };
+const fsRow = (label) => {
+  const svg = el("svg", [...(CSS_OF[label] ? [el("style", [`.${CSS_OF[label]}Svg{fill-rule:evenodd;fill:#9CBE30;}`])] : []), el("path", [])]);
+  const inner = el("div", [el("div", [svg]), el("div", [el("div", [el("span", [el("span", [label])])])])]);
+  inner.setAttribute("data-testid", "search-" + label.toLowerCase());
+  return el("li", [el("div", [inner])]);
+};
+const realCard = (labels) => el("div", [el("h3", ["Search Records"]), el("ul", labels.map(fsRow)), el("a", ["Search Trees"])]);
+const HOME_ROWS = ["FamilySearch", "Ancestry", "MyHeritage", "Findmypast", "Geneanet", "Storied", "Filae", "Google"];
+const fscReal = realCard(["FamilySearch", "Ancestry", "Ancestry Institution", "MyHeritage", "MyHeritage Library Edition", "Findmypast", "Geneanet", "Storied", "Filae", "Google"]);
+globalThis.document = el("body", [bigPageText(), fscReal]);
+const rInst = FSSE.findEntryByLabel(fscReal, "Ancestry Institution");
+const rLe = FSSE.findEntryByLabel(fscReal, "MyHeritage Library Edition");
+check("real markup: the logo's inline CSS is in the row's textContent but not in the text a reader sees",
+  /\.ancestrySvg\{/.test(rInst.textContent) && FSSE._shownText(rInst).trim() === "Ancestry Institution" && FSSE._shownText(fscReal.children[1]).indexOf("Svg{") < 0);
+check("real markup, center: 'Ancestry Institution' → its <li> (never the text cell inside FamilySearch's own row)", rInst.tagName === "LI" && rInst.parentElement === fscReal.children[1], rInst.tagName);
+check("real markup, center: 'MyHeritage Library Edition' → its <li>; 'Ancestry' and 'MyHeritage' theirs",
+  rLe.tagName === "LI" && FSSE.findEntryByLabel(fscReal, "Ancestry").tagName === "LI" && FSSE.findEntryByLabel(fscReal, "MyHeritage").tagName === "LI" && FSSE.findEntryByLabel(fscReal, "Ancestry") !== rInst);
+check("real markup, center: the native entry's click target is the label cell inside that <li>", (() => { const n = FSSE.findNativeEntry(fscReal, ["Ancestry Institution"]); return n.row === rInst && n.leaf.tagName === "SPAN" && n.leaf.textContent === "Ancestry Institution" && n.url === null; })());
+
+// ---- v1.0.6: "Simulate a FamilySearch Center" — the two rows at home ----------------------------
+const home = realCard(HOME_ROWS);
+globalThis.document = el("body", [bigPageText(), home]);
+const homeUl = home.children[1];
+check("simulation off: nothing is added, the center rows are absent", FSSE.simulateCenterRows(home, false) === 0 && FSSE.findNativeEntry(home, ["Ancestry Institution"]) === null);
+// The partner's row hidden behind our menu, and our menu row + panel after it (what a tick leaves).
+const homeAnc = FSSE.findEntryByLabel(home, "Ancestry");
+FSSE.setNativeHidden(homeAnc, true, "ancestry-records");
+const ourRow = el("li", [el("span", ["Ancestry ▸"])]); ourRow.setAttribute("data-fsse-id", "ancestry-records");
+const ourPanel = el("div", []); ourPanel.setAttribute("data-fsse-id", "ancestry-records-menu");
+homeAnc.after(ourRow); ourRow.after(ourPanel);
+check("simulation on: two stand-in rows are added", FSSE.simulateCenterRows(home, true) === 2);
+const sInst = FSSE.findNativeEntry(home, ["Ancestry Institution"]);
+const sLe = FSSE.findNativeEntry(home, ["MyHeritage Library Edition"]);
+check("the stand-ins are list-level rows in FamilySearch's own markup (logo CSS and all), marked as stand-ins",
+  sInst && sLe && sInst.row.tagName === "LI" && sLe.row.tagName === "LI" && /\.ancestrySvg\{/.test(sInst.row.textContent) && /\.myHeritageSvg\{/.test(sLe.row.textContent) &&
+  sInst.row.getAttribute("data-fsse-sim") === "Ancestry Institution" && sLe.row.getAttribute("data-fsse-sim") === "MyHeritage Library Edition" && sInst.url === null);
+check("…in a center's order: after the partner's row and our own menu row + panel there",
+  homeUl.children.indexOf(sInst.row) === homeUl.children.indexOf(ourPanel) + 1 && homeUl.children.indexOf(sLe.row) === homeUl.children.indexOf(FSSE.findEntryByLabel(home, "MyHeritage")) + 1,
+  homeUl.children.map((c) => c.getAttribute("data-fsse-sim") || c.getAttribute("data-fsse-id") || FSSE._shownText(c).trim()).join(" | "));
+check("…shown although the row it was copied from is hidden, with a test id of its own",
+  sInst.row.style.display !== "none" && sInst.row.getAttribute("data-fsse-hidden") === null && homeAnc.style.display === "none" &&
+  sInst.row.querySelectorAll("*").some((x) => x.getAttribute("data-testid") === "search-ancestry institution") && homeAnc.querySelectorAll("*").some((x) => x.getAttribute("data-testid") === "search-ancestry"));
+check("…and found again every tick: a second pass adds nothing, 'Ancestry' still resolves to the native row", FSSE.simulateCenterRows(home, true) === 0 && FSSE.findEntryByLabel(home, "Ancestry") === homeAnc && homeUl.children.length === HOME_ROWS.length + 4);
+check("a stand-in answers no click: the hand-over is refused, so the menu's entry opens its reserve URL", FSSE.clickNative(sInst) === false && !sInst.leaf._clicks);
+check("a real center keeps FamilySearch's own rows: the simulation adds nothing there", (() => { globalThis.document = el("body", [fscReal]); const n = FSSE.simulateCenterRows(fscReal, true); globalThis.document = el("body", [bigPageText(), home]); return n === 0; })());
+check("simulation off again: both stand-ins are removed, the card is as FamilySearch drew it (plus our own row)",
+  FSSE.simulateCenterRows(home, false) === 2 && FSSE.findNativeEntry(home, ["Ancestry Institution"]) === null && FSSE.findNativeEntry(home, ["MyHeritage Library Edition"]) === null && homeUl.children.length === HOME_ROWS.length + 2);
 
 // ---- v1.0.5: does this page show its signed-in user a Temple menu? (the settings page's live
 // question — FamilySearch draws the Temple menu for church members only) -----------------------

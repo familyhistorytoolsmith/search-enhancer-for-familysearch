@@ -140,6 +140,15 @@
     pruneDisabled();
     const searchSection = FSSE.findSection();
     const templeSection = FSSE.findTempleSection ? FSSE.findTempleSection() : null;
+    // v1.0.6: the "Simulate a FamilySearch Center" setting (Advanced, off by default) adds
+    // stand-ins for the two rows a center's network lists, BEFORE the sites look for their
+    // native rows — the two center menus then appear at home exactly as at a center. Off, any
+    // stand-in goes and the menus with it (their `applies` asks for the native row).
+    if (FSSE.simulateCenterRows) {
+      const sim = !!(FSSE.settings && FSSE.settings.get("test.center"));
+      const n = FSSE.simulateCenterRows(searchSection, sim);
+      if (n) FSSE.log(`center simulation ${sim ? "on" : "off"}: ${n} stand-in row(s) ${sim ? "added or moved" : "removed"}`);
+    }
     if (!searchSection && !templeSection) return;
     if (searchSection) FSSE.dumpDiag(); // one-time page map (only logs once)
     const person = FSSE.currentPerson;

@@ -196,6 +196,30 @@
     return n;
   }
 
+  // The text of an element as a reader sees it: textContent WITHOUT what a <style> / <script>
+  // (or an SVG's <title> / <desc>) holds. v1.0.6 — Kevin's FamilySearch Center screenshots,
+  // 2026-11-14: every partner logo is an inline SVG that carries its own stylesheet
+  // (".ancestrySvg{fill:#9CBE30;}", ".myHeritageSvg{…}" — read off FamilySearch's bundle), and
+  // that CSS is part of the row's textContent. "Ancestry" + ".ancestrySvg" is one name twice, but
+  // "Ancestry Institution" + ".ancestrySvg" counted as TWO entries, so the institution row's own
+  // inner container (logo + text) passed for the entry list: our menu row was cloned from the
+  // text cell alone and its panel landed BESIDE the label inside FamilySearch's row.
+  const UNSEEN = "style, script, title, desc";
+  function shownText(el) {
+    let t = String((el && el.textContent) || "");
+    if (!t || !el.querySelectorAll) return t;
+    let unseen = [];
+    try {
+      unseen = el.querySelectorAll(UNSEEN) || [];
+    } catch (_) {}
+    for (const u of unseen) {
+      const s = u.textContent;
+      if (s) t = t.split(s).join(" ");
+    }
+    return t;
+  }
+  FSSE._shownText = shownText; // tests/layout.test.js
+
   // Locate the search panel to inject into. FS renders DIFFERENT page layouts by viewport
   // width (narrow = e.g. DevTools docked to the side, a small window, browser zoom), and both
   // the classic "Search Records" card AND the narrow layout's third-party-only cluster
@@ -474,7 +498,7 @@
       const seen = new Set();
       for (const el of els) {
         if (el.childElementCount) continue;
-        if (el.tagName === "STYLE" || el.tagName === "SCRIPT") continue; // no inline-CSS noise
+        if (/^(style|script)$/i.test(el.tagName)) continue; // no inline-CSS noise (an SVG's <style> is lower-case)
         const t = el.textContent.trim().replace(/\s+/g, " ");
         if (t && t.length <= 60) seen.add(t);
       }
@@ -485,9 +509,10 @@
       }
       return null;
     }
-    // The entry list = nearest ancestor that holds 2+ known entries.
+    // The entry list = nearest ancestor that holds 2+ known entries — counted in the text a
+    // reader sees (v1.0.6: a logo's inline CSS names its site too, see shownText).
     let list = leaf.parentElement;
-    while (list && list !== section && countKnown(list.textContent) < 2) {
+    while (list && list !== section && countKnown(shownText(list)) < 2) {
       list = list.parentElement;
     }
     if (!list) list = section;
@@ -541,8 +566,63 @@
   FSSE.clickNative = function clickNative(entry) {
     const target = entry && (entry.leaf || entry.row);
     if (!target || !target.isConnected || typeof target.click !== "function") return false;
+    // A stand-in row of the center simulation (below) has no FamilySearch handler behind it.
+    if (entry.row && entry.row.getAttribute && entry.row.getAttribute("data-fsse-sim") != null) return false;
     target.click();
     return true;
+  };
+
+  // v1.0.6 — a FamilySearch Center at home (Kevin, 2026-11-14: "a test mechanism that will allow
+  // me to see these menus … without needing to travel to the FSC"). FamilySearch draws the two
+  // center rows with the SAME list-item component as every partner row — same logo, another
+  // name (read off its bundle: { name: "Ancestry Institution", Icon: <the Ancestry icon> } behind
+  // a permission its center sessions carry) — so a deep copy of the native "Ancestry" /
+  // "MyHeritage" row under the other name IS the markup a center shows, inline logo CSS and all.
+  // With `on`, each missing row is added right after its partner's row (and after our own menu
+  // row + panel there, the order a center has); a row FamilySearch itself lists is left alone.
+  // Without, every stand-in is removed. Stand-ins carry data-fsse-sim; nothing behind them
+  // answers a click, so a menu's hand-over entry opens its reserve URL (clickNative above).
+  // Returns the number of rows added or removed.
+  const CENTER_ROWS = [
+    ["Ancestry", "Ancestry Institution"],
+    ["MyHeritage", "MyHeritage Library Edition"],
+  ];
+  FSSE.simulateCenterRows = function simulateCenterRows(section, on) {
+    let changed = 0;
+    const all = typeof document !== "undefined" && document.querySelectorAll ? [...document.querySelectorAll("[data-fsse-sim]")] : [];
+    for (const el of all) {
+      if (on && section && section.contains(el)) continue;
+      el.remove(); // switched off — or left behind in a panel that is no longer the picked one
+      changed++;
+    }
+    if (!on || !section) return changed;
+    for (const [base, label] of CENTER_ROWS) {
+      if (FSSE.findEntryByLabel(section, label, true)) continue; // a real center, or our stand-in
+      const src = FSSE.findEntryByLabel(section, base, true);
+      if (!src || !src.cloneNode) continue;
+      const fake = src.cloneNode(true);
+      const els = deepElements(fake).concat(fake);
+      const leaf = findSmallestWithText(els, base);
+      if (!leaf) continue;
+      leaf.textContent = label;
+      for (const el of els) {
+        if (!el.getAttribute) continue;
+        if (el.getAttribute("data-fsse-hidden") != null) {
+          el.removeAttribute("data-fsse-hidden"); // the partner's row may be hidden behind our menu
+          if (el.style) el.style.display = "";
+        }
+        if (el.tagName === "A") el.removeAttribute("href");
+        const tid = el.getAttribute("data-testid");
+        if (tid && tid.toLowerCase().endsWith(base.toLowerCase())) el.setAttribute("data-testid", tid.slice(0, tid.length - base.length) + label.toLowerCase());
+      }
+      fake.setAttribute("data-fsse-sim", label);
+      fake.setAttribute("title", FSSE.wrapTip(`Stand-in for FamilySearch's "${label}" row (the "Simulate a FamilySearch Center" setting). The real row exists only on a FamilySearch Center's network.`));
+      let at = src;
+      while (at.nextElementSibling && at.nextElementSibling.getAttribute && at.nextElementSibling.getAttribute("data-fsse-id") != null) at = at.nextElementSibling;
+      at.after(fake);
+      changed++;
+    }
+    return changed;
   };
 
   // Hide (hide = true) or restore a native entry our menu replaces. Hidden with an INLINE

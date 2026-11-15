@@ -36,30 +36,34 @@ manifest inside.
 Unofficial. Pre-filled record searches (Ancestry, MyHeritage, Findmypast, FreeBMD, GRO and more) on FamilySearch person pages.
 ```
 
-**Description** (plain text; the store shows line breaks, no formatting):
+**Description** (plain text; the store shows line breaks, no formatting). REWRITTEN 2026-11-13 after the first
+submission was rejected for keyword spam (violation "Yellow Argon": three lists of site names in the description).
+Google's spam FAQ: name no more than five supported websites or brands in the description, put a longer list
+behind a link or in a promotional image, and keep any one keyword to about five uses. This version names the
+same five sites as the summary, once each, and links to the help page for the rest:
 
 ```
 Unofficial — not affiliated with, endorsed by, sponsored by or supported by FamilySearch International.
 
-Search Enhancer for FamilySearch adds pre-filled record searches and a few research aids to the person pages of FamilySearch Family Tree. Open a person, and the page's own Search Records list gains expandable menus whose entries open a search on the chosen site with the person's name, years, places, spouse and parents already filled in — built from the page you are looking at, nothing else.
+This extension adds pre-filled record searches and a few research aids to the person pages of Family Tree. Open a relative's page, and its own Search Records list gains expandable menus. Each entry opens the chosen site with the name, years, places, spouse and parents already filled in — built from what you are looking at, nothing else.
 
-WHAT IT ADDS TO THE SEARCH RECORDS LIST
+WHAT IT ADDS TO THAT LIST
 
-• FamilySearch ▸ — every FamilySearch collection search that fits the person: censuses, birth / marriage / death indexes, passenger lists, military records, Full-Text Search, all collections. Each entry carries the person's tree ID, so the results page shows who you are searching for. Searches whose collection is already attached to the person are ticked.
+• A FamilySearch menu — every collection that fits the person: censuses, birth, marriage and death indexes, passenger lists, military files and full-text collections. Each one carries the tree ID, so the results show who you are looking for. Collections already attached to the person are ticked.
 
-• Ancestry ▸, MyHeritage ▸, Findmypast ▸ — the site's own search for the person first (exactly as FamilySearch's standard row runs it), then searches scoped to the countries the person lived in, the censuses, civil and parish records, and member trees.
+• Ancestry, MyHeritage and Findmypast — each standard row expands into the site's own search for the person first, exactly as the standard row runs it, then lookups scoped to the countries they lived in, the censuses, civil and parish records, and member trees.
 
-• At a FamilySearch Center — where FamilySearch lists its Ancestry Institution and MyHeritage Library Edition rows, each becomes a menu too, with the same searches on the editions a center's patrons can use without an account of their own.
+• England and Wales civil registration — the free birth, marriage and death indexes at FreeBMD and the GRO, with the form filled in and submitted for you.
 
-• FreeBMD ▸ and GRO Index ▸ — the England & Wales civil birth, marriage and death indexes, free; the site's search form is filled and submitted for you.
+• Scotland and Ireland — statutory, civil and parish registers and the Scottish censuses, offered only when the tree shows events there.
 
-• ScotlandsPeople ▸ — statutory registers, Old Parish Registers and the 1841–1921 censuses, the form filled for you (free login; images cost credits).
+• Newspaper archives — chosen by the countries those events touch.
 
-• RootsIreland ▸ and IrishGenealogy ▸ — the Irish county genealogy centres' transcripts and Ireland's free official civil and church registers.
+• At a family history center — the institution and library edition rows shown there expand the same way, for patrons without an account of their own.
 
-• Newspapers ▸ — Newspapers.com, OldNews, GenealogyBank, Chronicling America, Findmypast's British & Irish newspapers, Trove and Papers Past, offered by the countries the person's events touch.
+The full list of supported websites, and which of them need a subscription, is on the help page: https://familyhistorytoolsmith.github.io/search-enhancer-for-familysearch/
 
-The lists are content-aware: a search is offered only when its collection covers the person's years and places. A woman is searched under her maiden name before her marriage and each married name after it. A person with no death date gets searches of the years they could have died. Hover any entry to see exactly what a click will send.
+The lists are content-aware: an entry is offered only when its collection covers the right years and places. A woman is looked up under her maiden name before her marriage and each married name after it. Someone with no death date is covered across the years they could have died. Hover any entry to see exactly what a click will send.
 
 RESEARCH AIDS
 
@@ -67,15 +71,15 @@ RESEARCH AIDS
 
 • Hover the Data Quality Score badge for the number behind Low / Medium / High, the thresholds, and the changes that would raise it.
 
-• For signed-in members of The Church of Jesus Christ of Latter-day Saints, four links in the Temple menu — the fourth opens the FamilySearch Labs experiment "Families with Remaining Ordinances" and, while that experiment is off, offers to turn it on through FamilySearch's own Labs page first.
+• For signed-in members of The Church of Jesus Christ of Latter-day Saints, four links in the Temple menu. The fourth opens the Labs experiment "Families with Remaining Ordinances" and, while that experiment is off, offers to turn it on in Labs first.
 
-Every feature can be switched off on the settings page (click the toolbar icon), and the Ancestry / Findmypast links can be pointed at your own regional site.
+Every feature can be switched off on the settings page (click the toolbar icon), and the partner links can be pointed at your own regional edition.
 
 PRIVACY
 
-The extension runs entirely in your browser. It reads the FamilySearch page you are viewing and sends nothing anywhere except on your click: the search you open, the place name sent to OpenStreetMap's geocoder for a map link, and Google's embedded map on the map page. No account, no analytics, nothing collected or sold. Full policy: https://familyhistorytoolsmith.github.io/search-enhancer-for-familysearch/privacy-policy.html
+The extension runs entirely in your browser. It reads what you are viewing and sends nothing anywhere except on your click: the search you open, the place name sent to a free map geocoder for a map link, and the embedded map on the map page. No account, no analytics, nothing collected or sold. Full policy: https://familyhistorytoolsmith.github.io/search-enhancer-for-familysearch/privacy-policy.html
 
-A FamilySearch account is needed (free). Viewing records on Ancestry, MyHeritage, Findmypast, Newspapers.com, GenealogyBank and RootsIreland needs those sites' own subscriptions. FreeBMD, GRO, ScotlandsPeople (index results), IrishGenealogy, Chronicling America, Trove and Papers Past are free.
+You need to be signed in to Family Tree (a free account). The extension itself is free.
 
 FamilySearch is a trademark of FamilySearch/Intellectual Reserve, Inc., and may be registered in the United States of America and other countries.
 ```
@@ -156,6 +160,21 @@ familyhistorytoolsmith@gmail.com. Google counts reading page content and even lo
 ## Test instructions for the reviewer
 
 (The field for notes to the review team. Never your own FamilySearch login.)
+
+The dashboard's Additional instructions box takes 500 characters at most (found 2026-11-12), so this short
+version is what goes in; the Username and Password fields stay empty:
+
+```
+Needs a free FamilySearch account (no tree of your own needed).
+1) Sign in, then open https://www.familysearch.org/en/tree/person/details/LH18-4BZ
+2) In the Search Records panel, click FamilySearch ▸, Ancestry ▸, FreeBMD ▸ or GRO Index ▸; a menu entry opens that site's pre-filled search in a new tab.
+3) "📍 map" links after places open Google Maps.
+4) Hover the Quality Score badge for the number.
+5) The toolbar icon opens the settings.
+Temple links show only for Church members.
+```
+
+The longer text below is the full version, kept for reference (it does not fit the box):
 
 ```
 This extension only acts on FamilySearch Family Tree person pages, which need a free FamilySearch account. Creating one at familysearch.org takes a minute; no tree of your own is needed — Family Tree is shared.

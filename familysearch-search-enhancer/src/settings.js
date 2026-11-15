@@ -100,6 +100,8 @@
     { key: "site.remaining-ordinances", group: "temple", label: "Remaining Temple Ordinances", hint: "Further ordinances for people on your Completed list.", default: true },
     { key: "site.family-remaining-ordinances", group: "temple", label: "Families with Remaining Ordinances", hint: "A FamilySearch Labs experiment: families on your Completed list whose members still need ordinances. While the experiment is off, the click offers to turn it on (through FamilySearch's own Labs page) before opening it.", default: true },
     { key: "debug", group: "advanced", label: "Console diagnostics", hint: "Write the extension's [FSSE] messages to the DevTools console — for a bug report, filter the console by FSSE and paste the lines.", default: false },
+    // v1.0.6 — the two center menus without the drive (Kevin, 2026-11-14); content.js / inject.js simulateCenterRows.
+    { key: "test.center", group: "advanced", label: "Simulate a FamilySearch Center", hint: "For testing: adds stand-ins for the two rows FamilySearch lists only on a FamilySearch Center's network, so the Ancestry Institution and MyHeritage Library Edition menus can be looked at anywhere. Their searches open the institution sites, which let you in only at a center.", default: false },
   ];
   const DEFAULTS = {};
   for (const s of SCHEMA) DEFAULTS[s.key] = s.default;
