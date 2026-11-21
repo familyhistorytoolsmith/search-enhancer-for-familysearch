@@ -55,7 +55,7 @@ function fakeDocument() {
     };
     return n;
   };
-  const byId = { ver: node("span"), groups: node("main"), status: node("span"), reset: node("button"), nostore: node("div") };
+  const byId = { ver: node("span"), groups: node("main"), status: node("span"), reset: node("button"), nostore: node("div"), home: node("a"), help: node("a") };
   byId.nostore.hidden = true;
   return {
     byId,
@@ -75,7 +75,7 @@ async function openPage(tabs, tabOpts, noTabsApi) {
   const doc = fakeDocument();
   globalThis.document = doc;
   const tabsApi = fakeTabs(tabs, tabOpts);
-  globalThis.chrome = { runtime: { lastError: null, getManifest: () => ({ version: "9.9.9" }) }, storage: storageFake() };
+  globalThis.chrome = { runtime: { lastError: null, getManifest: () => ({ version: "9.9.9", homepage_url: "https://help.example/page/" }) }, storage: storageFake() };
   if (!noTabsApi) globalThis.chrome.tabs = tabsApi;
   const S = require(path.join(SRC, "settings.js"));
   require(path.join(SRC, "options.js"));
@@ -134,6 +134,17 @@ const others = (page) => page.sections().filter((s) => s.title !== "Temple menu"
   check("page: nothing takes the group's place (no note, no link) and its switches stay in the page for Restore defaults",
     page.doc.byId.groups.children.length === 8 && temple(page).sec.children.length === 3 && temple(page).sec.children[2].children.length === 4);
   check("page: the version shows; the storage warning stays hidden", page.doc.byId.ver.textContent === "v9.9.9" && page.doc.byId.nostore.hidden === true);
+
+  // v1.0.7: the title and the Help link open the help page
+  check("page: the title and the Help link take the manifest's homepage_url", page.doc.byId.home.href === "https://help.example/page/" && page.doc.byId.help.href === "https://help.example/page/");
+  {
+    const html = fs.readFileSync(path.join(SRC, "options.html"), "utf8");
+    const real = JSON.parse(fs.readFileSync(path.join(SRC, "..", "manifest.json"), "utf8")).homepage_url;
+    const links = ["home", "help"].map((id) => (new RegExp(`<a [^>]*id="${id}"[^>]*>`).exec(html) || [""])[0]);
+    check("options.html: both links carry the help page's address as plain HTML, open a new tab (a popup must not navigate itself) and pass no opener",
+      /^https:\/\//.test(real || "") && links.every((a) => a.includes(`href="${real}"`) && a.includes('target="_blank"') && /rel="[^"]*noopener/.test(a)), links.join(" | "));
+    check("options.html: the title is the link, inside the h1", /<h1><a [^>]*id="home"[^>]*>Search Enhancer for FamilySearch<\/a><\/h1>/.test(html));
+  }
 
   page = await openPage([T({ temple: true })]);
   await wait(20);

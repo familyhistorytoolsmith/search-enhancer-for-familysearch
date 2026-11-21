@@ -7,7 +7,8 @@ build-store-zip.ps1 — builds the Chrome Web Store upload for Search Enhancer f
 
 What it does, in order:
   1. refuses a dev build (FSSE.DEBUG = true in src/inject.js), a manifest without minimum_chrome_version,
-     and a version that is not three dotted integers;
+     a version that is not three dotted integers, and a help page (docs/index.html) whose version line
+     names another version than the manifest;
   2. node --check on every src/*.js, then node tests/run.js (must print ALL GREEN);
   3. stages manifest.json, README.md, src\* and icons\*.png in a fresh temp folder (never tests\,
      never icons\previews\);
@@ -32,6 +33,13 @@ if ($ver -notmatch '^\d+\.\d+\.\d+$') { throw "manifest version '$ver' is not th
 if (-not $manifest.minimum_chrome_version) { throw "manifest.json lacks minimum_chrome_version" }
 $inject = Get-Content (Join-Path $ext "src\inject.js") -Raw
 if ($inject -match 'FSSE\.DEBUG\s*=\s*true\b') { throw "src/inject.js has FSSE.DEBUG = true (a dev build) — set it false for the store" }
+# the help page names the version it describes (v1.0.7) — a release must not leave it behind
+$helpPage = Join-Path $PSScriptRoot "docs\index.html"
+if (Test-Path $helpPage) {
+  $pm = [regex]::Match((Get-Content $helpPage -Raw), 'id="ext-version">(\d+\.\d+\.\d+)<')
+  if (-not $pm.Success) { throw "docs/index.html has no version line (span id=ext-version)" }
+  if ($pm.Groups[1].Value -ne $ver) { throw "docs/index.html says it describes version $($pm.Groups[1].Value) but the manifest is $ver — update the page's version line (and review the page) first" }
+}
 
 # 2. syntax + tests
 Push-Location $ext

@@ -55,6 +55,32 @@ try {
   const debugOn = /FSSE\.DEBUG\s*=\s*true\b/.test(fs.readFileSync(path.join(root, "src", "inject.js"), "utf8"));
   console.log(`info FSSE.DEBUG = ${debugOn} (${debugOn ? "dev build — the store build script refuses it" : "release build"})`);
 }
+// v1.0.7: the help page (docs/index.html, served by GitHub Pages) names the version it describes.
+// It is brought up to date at a RELEASE, not at every dev bump, so a page that trails the manifest
+// is only reported here — build-store-zip.ps1 is what refuses a release until the two agree. A page
+// without the line, or one naming a version the manifest has not reached, is an error.
+{
+  const page = path.join(root, "..", "docs", "index.html");
+  if (fs.existsSync(page)) {
+    const nums = (v) => v.split(".").map(Number);
+    const newer = (a, b) => {
+      const [x, y] = [nums(a), nums(b)];
+      for (let i = 0; i < 3; i++) if (x[i] !== y[i]) return x[i] > y[i];
+      return false;
+    };
+    let mv = "";
+    try {
+      mv = JSON.parse(fs.readFileSync(path.join(root, "manifest.json"), "utf8")).version;
+    } catch (_) {}
+    const m = /id="ext-version">(\d+\.\d+\.\d+)</.exec(fs.readFileSync(page, "utf8"));
+    if (!m) step("help page version line", false, 'docs/index.html has no <span id="ext-version">x.y.z</span>');
+    else if (mv && newer(m[1], mv)) step("help page version line", false, `docs/index.html says ${m[1]}, the manifest is only ${mv}`);
+    else {
+      const behind = m[1] === mv ? "" : " (manifest v" + mv + " — update the page's version line before a release)";
+      console.log(`info help page describes v${m[1]}${behind}`);
+    }
+  }
+}
 
 // 3. Each suite.
 const suites = fs

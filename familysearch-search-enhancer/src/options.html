@@ -11,8 +11,13 @@
   header { display: flex; align-items: center; gap: 10px; padding: 12px 16px 10px; border-bottom: 1px solid #d9dee3; background: #f7f8f9; }
   header img { width: 32px; height: 32px; flex: none; }
   header h1 { margin: 0; font-size: 15px; font-weight: 600; line-height: 1.2; }
+  header h1 a { color: inherit; text-decoration: none; }
+  header h1 a:hover, header h1 a:focus-visible { color: #1f3a5f; text-decoration: underline; }
   header .sub { margin: 2px 0 0; color: #5b6b7a; font-size: 12px; }
-  header .ver { margin-left: auto; color: #7a8794; font-size: 12px; white-space: nowrap; }
+  header .side { margin-left: auto; display: flex; flex-direction: column; align-items: flex-end; gap: 2px; white-space: nowrap; }
+  header .ver { color: #7a8794; font-size: 12px; }
+  header .help { color: #1f5fa8; font-size: 12px; text-decoration: none; }
+  header .help:hover, header .help:focus-visible { text-decoration: underline; }
   section { padding: 10px 16px 4px; border-bottom: 1px solid #eef1f4; }
   section:last-of-type { border-bottom: 0; }
   h2 { margin: 0 0 4px; font-size: 11.5px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; color: #5b6b7a; }
@@ -38,10 +43,13 @@
 <header>
   <img src="../icons/icon32.png" alt="">
   <div>
-    <h1>Search Enhancer for FamilySearch</h1>
+    <h1><a id="home" href="https://familyhistorytoolsmith.github.io/search-enhancer-for-familysearch/" target="_blank" rel="noopener" title="Open the help page: what each menu does, the settings, privacy">Search Enhancer for FamilySearch</a></h1>
     <p class="sub">Unofficial · not affiliated with FamilySearch</p>
   </div>
-  <span class="ver" id="ver"></span>
+  <div class="side">
+    <span class="ver" id="ver"></span>
+    <a class="help" id="help" href="https://familyhistorytoolsmith.github.io/search-enhancer-for-familysearch/" target="_blank" rel="noopener" title="Open the help page in a new tab">Help ↗</a>
+  </div>
 </header>
 <div id="nostore" class="nostore" hidden>Settings cannot be saved here: the browser's extension storage is unavailable. The defaults are in force.</div>
 <main id="groups"></main>

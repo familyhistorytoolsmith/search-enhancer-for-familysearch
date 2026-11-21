@@ -347,6 +347,10 @@ pointed at your own regional site. Three ways to the settings page (all the same
 
 Nothing on the FamilySearch page itself leads there — the menus stay search entries only.
 
+The top of the settings page shows the installed version. The title there, and the **Help** link
+under the version, open the [help page](https://familyhistorytoolsmith.github.io/search-enhancer-for-familysearch/)
+in a new tab; that page says which version it describes.
+
 | Group | Switches | What "off" does |
 | --- | --- | --- |
 | **Search Records menus** | FamilySearch · Ancestry · MyHeritage · Findmypast | These four menus stand in for FamilySearch's own row for that site. Untick one and our menu goes, and **FamilySearch's standard row comes back** — the thing to do when you have no account with that site and only want the standard search. |

@@ -42,7 +42,9 @@
   ul, ol { padding-left: 1.4rem; }
   ol li { margin: 10px 0; }
   a { color: var(--accent); }
-  .tagline { color: var(--muted); margin: 0 0 18px; }
+  .tagline { color: var(--muted); margin: 0 0 6px; }
+  .version { color: var(--muted); font-size: 0.93rem; margin: 0 0 18px; }
+  .version strong { color: var(--ink); }
   .note { background: var(--band); border-left: 4px solid var(--accent); padding: 10px 14px; margin: 16px 0; }
   .links { display: flex; flex-wrap: wrap; gap: 8px 18px; margin: 0 0 8px; font-size: 0.97rem; }
   .button { display: inline-block; background: var(--button); color: var(--button-ink); text-decoration: none; font-weight: 600; padding: 10px 18px; border-radius: 8px; margin: 6px 0 4px; }
@@ -65,6 +67,7 @@
     <img src="img/promo-tile-440x280.png" srcset="img/promo-tile-440x280.png 1x, img/promo-tile-880x560.png 2x" width="440" height="280" alt="Search Enhancer for FamilySearch">
   </picture></h1>
   <p class="tagline">A Chrome extension that adds pre-filled record searches and research aids to FamilySearch Family Tree person pages.</p>
+  <p class="version">This page describes <strong>version <span id="ext-version">1.0.7</span></strong>. Your own version is shown at the top of the extension's <a href="#settings">settings page</a>; a copy from the Chrome Web Store can be a version behind for a few days while an update is reviewed.</p>
 </header>
 
 <p class="links">
@@ -98,7 +101,7 @@
 <h3>If you loaded an earlier copy by hand</h3>
 <p><strong>Remove the hand-loaded copy first</strong> (<code>chrome://extensions</code> → <em>Remove</em> on its card), then install from the store. To Chrome the store copy is a different extension: its settings start over (a minute's work on the settings page), and two copies running side by side would both add rows and fight over FamilySearch's own ones.</p>
 
-<p class="small">Good to know: Microsoft Edge can install extensions from the Chrome Web Store as well, but the extension has only been tested in Chrome. To run the extension from its source code instead, see the <a href="https://github.com/familyhistorytoolsmith/search-enhancer-for-familysearch#install">README</a>.</p>
+<p class="small">Good to know: the extension also works in Microsoft Edge. Open the same store page in Edge, allow extensions from other stores when Edge asks, and click <strong>Get</strong>. To run the extension from its source code instead, see the <a href="https://github.com/familyhistorytoolsmith/search-enhancer-for-familysearch#install">README</a>.</p>
 
 <h2 id="what-it-adds">What it adds</h2>
 <p>Open a person in Family Tree and the page's own <strong>Search Records</strong> list gains expandable menus. Each entry opens a search on the chosen site with the person's name, years, places, spouse and parents already filled in, built from the page you are looking at and nothing else. Hover any entry to see exactly what a click will send.</p>

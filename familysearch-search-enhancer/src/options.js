@@ -103,6 +103,22 @@
     $("ver").textContent = "";
   }
 
+  // ---- the help page (v1.0.7) ----------------------------------------------------------------
+  // The title and the "Help" link under the version open the help page in a new tab (Kevin,
+  // 2026-11-21). options.html carries the address so the links work as plain HTML; the manifest's
+  // homepage_url, when present, is the one source of truth and overrides it here.
+  try {
+    const home = chrome.runtime.getManifest().homepage_url;
+    if (home) {
+      for (const id of ["home", "help"]) {
+        const a = $(id);
+        if (a) a.href = home;
+      }
+    }
+  } catch (_) {
+    // no extension runtime (the page opened as a plain file): the address in options.html stands
+  }
+
   // ---- render ----------------------------------------------------------------------------
   const inputs = {}; // key → the checkbox / select
   let statusTimer = null;
