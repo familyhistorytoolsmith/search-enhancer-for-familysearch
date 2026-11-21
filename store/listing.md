@@ -196,10 +196,20 @@ The extension makes no request of its own; the only network activity is the sear
 
 ## After approval
 
+**PUBLISHED, unlisted, 2026-11-20** — version 1.0.5 (the store page says "Updated November 13, 2026"),
+offered by Family History Toolsmith:
+https://chromewebstore.google.com/detail/search-enhancer-for-famil/elhjnfkdnbeiedbeedlpepkdkmnecokp
+(the short form `https://chromewebstore.google.com/detail/elhjnfkdnbeiedbeedlpepkdkmnecokp` redirects there).
+Unlisted = not in the store's search; anyone with the link can install.
+
 - The store copy has a NEW extension id: settings and the source cache start fresh, and anyone running
   the Load-unpacked copy must remove it first (two copies both inject rows and fight over the native rows).
-- `"homepage_url"` (the help page) is in the manifest since 1.0.3. Add the listing URL to the README's
-  Install section and to the help page's Install section (`docs/index.html`), and take the zip off the
-  GitHub Release — the early-access install route ends when the store copy exists.
+- `"homepage_url"` (the help page) is in the manifest since 1.0.3. The listing URL is in the README's
+  Install section, the help page's Install section (`docs/index.html`) and the feature guide since
+  2026-11-20. Still to do: take the zips off the GitHub Releases — the early-access install route ends
+  when the store copy exists (best after 1.0.6 is in the store, so the newest build stays obtainable).
+- Next upload: `search-enhancer-for-familysearch-v1.0.6.zip` (already built; the FamilySearch Center
+  menus open below their row, plus the "Simulate a FamilySearch Center" switch). Package tab → Upload
+  new package → Submit for review; the listing text and the privacy answers stay as they are.
 - Every update is re-reviewed: bump the version, run `build-store-zip.ps1`, Package tab → upload → submit.
   Bundle fixes rather than shipping each patch.

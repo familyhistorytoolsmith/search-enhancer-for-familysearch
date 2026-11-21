@@ -37,7 +37,7 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 OUT = sys.argv[1] if len(sys.argv) > 1 else os.path.join(HERE, "docs", "feature-guide.pdf")  # served by GitHub Pages
 ICONS = os.path.join(HERE, "familysearch-search-enhancer", "icons")
 PICTURES = os.path.join(HERE, "store")   # the marquee tile and the five store screenshots
-VERSION = "1.0.4"
+VERSION = "1.0.5"
 
 # ---------- fonts ----------
 F = r"C:\Windows\Fonts"
@@ -248,10 +248,10 @@ story += [tbl]
 # --- Getting started
 story += section("Getting started")
 story += bullets([
-    "<b>Install:</b> from the Chrome Web Store once its listing is live (<b>Add to Chrome</b>). Until then, download the zip "
-    "from the project\u2019s help page \u2014 <b>familyhistorytoolsmith.github.io/search-enhancer-for-familysearch</b> \u2014 unzip it "
-    "to a folder you will keep, open <b>chrome://extensions</b>, switch on <b>Developer mode</b>, click <b>Load unpacked</b> and "
-    "pick that folder; the help page has the step-by-step version. Never run both copies at once.",
+    "<b>Install:</b> from the Chrome Web Store. The project\u2019s help page \u2014 "
+    "<b>familyhistorytoolsmith.github.io/search-enhancer-for-familysearch</b> \u2014 has the link to the store page; click "
+    "<b>Add to Chrome</b> there, and Chrome keeps the extension up to date from then on. If you loaded an earlier copy by hand, "
+    "remove it first on <b>chrome://extensions</b> \u2014 never run both copies at once.",
     "Sign in to FamilySearch and open any person page. The new rows appear in the <b>Search Records</b> panel once the "
     "person\u2019s details have rendered.",
     "On FamilySearch\u2019s new <b>Labs</b> person page (the one with the \u201cOpt-Out of Experiment\u201d button), "

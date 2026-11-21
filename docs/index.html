@@ -87,29 +87,18 @@
 
 <h2 id="install">Install</h2>
 
-<h3>From the Chrome Web Store</h3>
-<p>The store listing is under review. When it is approved, this section becomes a single <strong>Add to Chrome</strong> link, and that is the way to install from then on.</p>
-
-<h3 id="install-now">Install now, before the Chrome Web Store</h3>
-<p>Until the listing is live you can load the same build by hand. It takes about two minutes and needs no technical knowledge, but it does ask you to keep one folder on your computer.</p>
-<p><a class="button" href="https://github.com/familyhistorytoolsmith/search-enhancer-for-familysearch/releases/latest">Download the latest release</a><br>
-<span class="small">On the page that opens, look under <strong>Assets</strong> and click the file named <code>search-enhancer-for-familysearch-v…zip</code>.</span></p>
+<h3 id="install-now">From the Chrome Web Store</h3>
+<p><a class="button" href="https://chromewebstore.google.com/detail/search-enhancer-for-famil/elhjnfkdnbeiedbeedlpepkdkmnecokp">Get it from the Chrome Web Store</a><br>
+<span class="small">On the page that opens, click <strong>Add to Chrome</strong>. Chrome keeps the extension up to date by itself from then on.</span></p>
 <ol>
-  <li><strong>Extract the zip to a folder you will keep.</strong> Not your Downloads folder: Chrome loads the extension from this folder every time it starts, so the folder has to stay where it is. On Windows, right-click the zip and choose <em>Extract All…</em>; it makes a folder named after the zip. A good home is <code>Documents\Search Enhancer</code>.</li>
-  <li><strong>Open Chrome's extensions page.</strong> Type <code>chrome://extensions</code> into the address bar and press Enter.</li>
-  <li><strong>Switch on Developer mode</strong> with the toggle at the top right of that page.</li>
-  <li><strong>Click Load unpacked</strong> (top left) and choose the folder you extracted, the one that contains <code>manifest.json</code>. The extension's card appears, named <em>Search Enhancer for FamilySearch</em>.</li>
   <li><strong>Sign in to FamilySearch</strong> and open any person in Family Tree. The extra rows appear in the page's <strong>Search Records</strong> panel once the person's details have loaded.</li>
   <li><strong>Optional: pin the icon.</strong> Chrome parks a new extension's toolbar icon behind the puzzle-piece menu; click that menu and the pin beside the extension to keep it visible. The icon opens the <a href="#settings">settings page</a>.</li>
 </ol>
 
-<h3>Updating a hand-loaded copy</h3>
-<p>A copy loaded this way does not update itself. When a new release appears: download the zip, extract it <em>over the same folder</em> (let Windows replace the files), then open <code>chrome://extensions</code> and click the <strong>reload</strong> arrow on the extension's card. Refresh any FamilySearch tab that was already open; a tab left open shows a one-line notice in its console asking for that refresh.</p>
-
-<h3>When the store listing goes live</h3>
+<h3>If you loaded an earlier copy by hand</h3>
 <p><strong>Remove the hand-loaded copy first</strong> (<code>chrome://extensions</code> → <em>Remove</em> on its card), then install from the store. To Chrome the store copy is a different extension: its settings start over (a minute's work on the settings page), and two copies running side by side would both add rows and fight over FamilySearch's own ones.</p>
 
-<p class="small">Good to know: some Chrome versions show a "Disable developer mode extensions" bubble at start-up — choose <em>Cancel</em> and it keeps working. A Chrome managed by a workplace or school may lock Developer mode; the store route is the one for those. Microsoft Edge loads unpacked extensions the same way (<code>edge://extensions</code>), but the extension has only been tested in Chrome.</p>
+<p class="small">Good to know: Microsoft Edge can install extensions from the Chrome Web Store as well, but the extension has only been tested in Chrome. To run the extension from its source code instead, see the <a href="https://github.com/familyhistorytoolsmith/search-enhancer-for-familysearch#install">README</a>.</p>
 
 <h2 id="what-it-adds">What it adds</h2>
 <p>Open a person in Family Tree and the page's own <strong>Search Records</strong> list gains expandable menus. Each entry opens a search on the chosen site with the person's name, years, places, spouse and parents already filled in, built from the page you are looking at and nothing else. Hover any entry to see exactly what a click will send.</p>

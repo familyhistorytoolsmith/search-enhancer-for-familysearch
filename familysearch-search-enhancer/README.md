@@ -15,7 +15,7 @@ native **"Search Records"** list on a FamilySearch person page
 > FamilySearch is a trademark of FamilySearch/Intellectual Reserve, Inc., and may be registered in
 > the United States of America and other countries.
 
-**Links:** [help page](https://familyhistorytoolsmith.github.io/search-enhancer-for-familysearch/) · [feature guide (PDF)](https://familyhistorytoolsmith.github.io/search-enhancer-for-familysearch/feature-guide.pdf) · [privacy policy](https://familyhistorytoolsmith.github.io/search-enhancer-for-familysearch/privacy-policy.html) · [latest release](https://github.com/familyhistorytoolsmith/search-enhancer-for-familysearch/releases/latest) · [source](https://github.com/familyhistorytoolsmith/search-enhancer-for-familysearch) — open source under the [MIT License](../LICENSE).
+**Links:** [Chrome Web Store](https://chromewebstore.google.com/detail/search-enhancer-for-famil/elhjnfkdnbeiedbeedlpepkdkmnecokp) · [help page](https://familyhistorytoolsmith.github.io/search-enhancer-for-familysearch/) · [feature guide (PDF)](https://familyhistorytoolsmith.github.io/search-enhancer-for-familysearch/feature-guide.pdf) · [privacy policy](https://familyhistorytoolsmith.github.io/search-enhancer-for-familysearch/privacy-policy.html) · [latest release](https://github.com/familyhistorytoolsmith/search-enhancer-for-familysearch/releases/latest) · [source](https://github.com/familyhistorytoolsmith/search-enhancer-for-familysearch) — open source under the [MIT License](../LICENSE).
 
 Every addition can be switched off on the extension's settings page, and the Ancestry / Findmypast links can be pointed at your regional site (see [Settings](#settings)). Out of the box it adds ten rows to the **Search Records** panel (four of them take the place of the native *Ancestry*, *FamilySearch*, *MyHeritage* and *Findmypast* rows, whose own searches live on as the first entry of each menu; on a FamilySearch Center's network two more rows become menus — see [At a FamilySearch Center](#at-a-familysearch-center)) and — for signed-in church members, on **every** FamilySearch page — four links to the top-level **Temple** menu after *Ordinances Ready*: **Temple Opportunities**, **Family Ordinance Opportunities**, **Remaining Temple Ordinances** and **Families with Remaining Ordinances** (each opens the matching familysearch.org page in the same tab, like the native menu items; the fourth is a FamilySearch Labs experiment — see [The Temple menu and the Labs experiment](#the-temple-menu-and-the-labs-experiment); accounts without the Temple menu are unaffected). On the **Source Linker** it adds a small **📍 compare** link after each place so you can see how far apart the record's place and the tree's place really are (see [Source Linker: compare two places on a map](#source-linker-compare-two-places-on-a-map)). And on a person page, hovering the **Data Quality Score** badge (Low / Medium / High) shows the **number behind the word**, the thresholds, and what would raise it (see [Quality Score: the number behind the badge](#quality-score-the-number-behind-the-badge)).
 
@@ -377,31 +377,20 @@ years and surnames that fit — and is deliberately not a setting.
 
 ## Install
 
-**From the Chrome Web Store** — the listing is under review; the link will appear here once it
-is live, and that becomes the normal route.
+**From the Chrome Web Store** — open the extension's
+[store page](https://chromewebstore.google.com/detail/search-enhancer-for-famil/elhjnfkdnbeiedbeedlpepkdkmnecokp)
+and click **Add to Chrome**; Chrome keeps it up to date from then on. Then open a person page, e.g.
+`https://www.familysearch.org/en/tree/person/details/GLQN-3Q2` (you must be signed in to
+FamilySearch). The new rows appear in the **Search Records** panel. Click one to open a
+pre-filled search in a new tab (or, for **FamilySearch ▸**, to expand the list).
 
-**Before the listing is live** — download the current build from the project's
-[latest release](https://github.com/familyhistorytoolsmith/search-enhancer-for-familysearch/releases/latest)
-(the `search-enhancer-for-familysearch-v<version>.zip` under *Assets*) and load it unpacked. The
-[help page](https://familyhistorytoolsmith.github.io/search-enhancer-for-familysearch/#install-now) has the
-step-by-step version; in short:
+**If you loaded an earlier copy unpacked** — remove it first (`chrome://extensions` → *Remove*
+on its card), then install from the store. To Chrome the store copy is a separate extension: its
+settings start over, and two copies would both add rows.
 
-1. Extract the zip to a folder you will keep (not Downloads — Chrome loads the extension from
-   that folder every time it starts).
-2. Open `chrome://extensions`, toggle **Developer mode** (top-right) on, click **Load unpacked**
-   and select the extracted folder (the one holding `manifest.json`).
-3. Open a person page, e.g. `https://www.familysearch.org/en/tree/person/details/GLQN-3Q2`
-   (you must be signed in to FamilySearch). The new rows appear in the **Search Records**
-   panel. Click one to open a pre-filled search in a new tab (or, for **FamilySearch ▸**, to
-   expand the list).
-
-An unpacked copy does not update itself: for a new release, download the zip, extract it over
-the same folder and click the **reload** ↻ icon on the extension's card. Once the store listing
-is live, remove the unpacked copy before installing from the store — to Chrome the store copy is
-a separate extension, and two copies would both add rows.
-
-**From the source** (development): clone this repository and load its
-`familysearch-search-enhancer/` folder unpacked the same way. After editing any file, return to
+**From the source** (development): clone this repository, open `chrome://extensions`, toggle
+**Developer mode** on, click **Load unpacked** and select the `familysearch-search-enhancer/`
+folder. After editing any file, return to
 `chrome://extensions` and click the **reload** ↻ icon on the extension card, then refresh the
 FamilySearch page.
 
