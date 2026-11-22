@@ -19,10 +19,11 @@ Facts behind the choices (read off Google's dashboard docs 2026-10-30) are in CL
 
 Upload the newest `search-enhancer-for-familysearch-v<version>.zip`, built by `build-store-zip.ps1` at the
 repo root (manifest.json at the zip root; the script checks that) — the same file a GitHub Release
-carries. Newest: `search-enhancer-for-familysearch-v1.0.5.zip` (2026-11-12 — the settings page leaves
-the Temple menu group out for an account without a Temple menu; 1.0.4 added the two FamilySearch Center
-menus). The dashboard reads the title, summary, version and icons from the
-manifest inside.
+carries. Newest: `search-enhancer-for-familysearch-v1.0.7.zip` (2026-11-21 — the settings page's title
+and a Help link open the help page; it also carries 1.0.6: the FamilySearch Center menus open below
+their row, and the "Simulate a FamilySearch Center" switch under Advanced). The store holds this
+build since 2026-11-21. The dashboard reads the title, summary, version and icons from the manifest
+inside.
 
 ---
 
@@ -196,8 +197,8 @@ The extension makes no request of its own; the only network activity is the sear
 
 ## After approval
 
-**PUBLISHED, unlisted, 2026-11-20** — version 1.0.5 (the store page says "Updated November 13, 2026"),
-offered by Family History Toolsmith:
+**PUBLISHED, unlisted, 2026-11-20** at version 1.0.5; **updated to 1.0.7** (the store page says
+"Updated November 21, 2026"; checked 2026-11-22), offered by Family History Toolsmith:
 https://chromewebstore.google.com/detail/search-enhancer-for-famil/elhjnfkdnbeiedbeedlpepkdkmnecokp
 (the short form `https://chromewebstore.google.com/detail/elhjnfkdnbeiedbeedlpepkdkmnecokp` redirects there).
 Unlisted = not in the store's search; anyone with the link can install.
@@ -206,10 +207,10 @@ Unlisted = not in the store's search; anyone with the link can install.
   the Load-unpacked copy must remove it first (two copies both inject rows and fight over the native rows).
 - `"homepage_url"` (the help page) is in the manifest since 1.0.3. The listing URL is in the README's
   Install section, the help page's Install section (`docs/index.html`) and the feature guide since
-  2026-11-20. Still to do: take the zips off the GitHub Releases — the early-access install route ends
-  when the store copy exists (best after 1.0.6 is in the store, so the newest build stays obtainable).
-- Next upload: `search-enhancer-for-familysearch-v1.0.6.zip` (already built; the FamilySearch Center
-  menus open below their row, plus the "Simulate a FamilySearch Center" switch). Package tab → Upload
-  new package → Submit for review; the listing text and the privacy answers stay as they are.
+  2026-11-20. The zips came off GitHub Releases v1.0.3 – v1.0.7 on 2026-11-22 and each Release's notes
+  now point at the store (the Releases stay as the change log; GitHub's automatic "Source code" links
+  cannot be removed).
+- First store update: 1.0.7, uploaded and published 2026-11-21 (it includes 1.0.6, which was never
+  uploaded by itself); the listing text and the privacy answers were left as they were.
 - Every update is re-reviewed: bump the version, run `build-store-zip.ps1`, Package tab → upload → submit.
   Bundle fixes rather than shipping each patch.
