@@ -37,7 +37,7 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 OUT = sys.argv[1] if len(sys.argv) > 1 else os.path.join(HERE, "docs", "feature-guide.pdf")  # served by GitHub Pages
 ICONS = os.path.join(HERE, "familysearch-search-enhancer", "icons")
 PICTURES = os.path.join(HERE, "store")   # the marquee tile and the five store screenshots
-VERSION = "1.0.5"
+VERSION = "1.0.7"
 
 # ---------- fonts ----------
 F = r"C:\Windows\Fonts"
@@ -178,7 +178,8 @@ story = []
 COVER_W = 5.6 * inch
 story += [banner("marquee-1400x560.png", 52, COVER_W), Spacer(1, 7),
           P("A Chrome extension that adds pre-filled record searches to a FamilySearch person page "
-            "\u00b7 reference sheet for version %s, November 2026" % VERSION, subc),
+            "\u00b7 reference sheet for version %s, November 2026 "
+            "\u00b7 install from <b>tinyurl.com/searchenhancer</b>" % VERSION, subc),
           Spacer(1, 4), rule(), Spacer(1, 6)]
 
 # --- What it is
@@ -248,10 +249,10 @@ story += [tbl]
 # --- Getting started
 story += section("Getting started")
 story += bullets([
-    "<b>Install:</b> from the Chrome Web Store. The project\u2019s help page \u2014 "
-    "<b>familyhistorytoolsmith.github.io/search-enhancer-for-familysearch</b> \u2014 has the link to the store page; click "
-    "<b>Add to Chrome</b> there, and Chrome keeps the extension up to date from then on. If you loaded an earlier copy by hand, "
-    "remove it first on <b>chrome://extensions</b> \u2014 never run both copies at once.",
+    "<b>Install:</b> type <b>tinyurl.com/searchenhancer</b> into the address bar \u2014 it opens the extension\u2019s Chrome "
+    "Web Store page \u2014 and click <b>Add to Chrome</b>; Chrome keeps it up to date from then on. The help page, "
+    "<b>familyhistorytoolsmith.github.io/search-enhancer-for-familysearch</b>, has the same link. "
+    "If you loaded an earlier copy by hand, remove it first on <b>chrome://extensions</b> \u2014 never run both copies at once.",
     "Sign in to FamilySearch and open any person page. The new rows appear in the <b>Search Records</b> panel once the "
     "person\u2019s details have rendered.",
     "On FamilySearch\u2019s new <b>Labs</b> person page (the one with the \u201cOpt-Out of Experiment\u201d button), "
@@ -259,9 +260,8 @@ story += bullets([
     "<b>Settings:</b> click the extension\u2019s toolbar icon (Chrome parks a new icon behind the puzzle-piece menu until you "
     "pin it). Every feature can be switched off there \u2014 switch a site\u2019s menu off and FamilySearch\u2019s own row for "
     "that site comes back \u2014 and the Ancestry / Findmypast links can be pointed at your own regional site.",
-    "<b>Updating:</b> the store copy updates itself. If rows ever look odd after an update, refresh the FamilySearch page. "
-    "A source copy is updated by replacing the folder, clicking the reload arrow on its card at chrome://extensions, then "
-    "refreshing the page.",
+    "<b>Updating:</b> the store copy updates itself; if rows look odd after an update, refresh the FamilySearch page. "
+    "A source copy: replace the folder, click the reload arrow on its card at chrome://extensions, refresh the page.",
 ])
 
 # --- Reading the menus
