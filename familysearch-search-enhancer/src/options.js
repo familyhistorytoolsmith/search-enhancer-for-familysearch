@@ -146,7 +146,9 @@
         S.save({ [s.key]: sel.value }).then(flash);
       });
       inputs[s.key] = sel;
-      return el("div", { class: "sel" }, [el("label", { for: sel.id, text: s.label }), sel, el("small", { text: s.hint || "" })]);
+      // `hintBelowLabel` (v1.0.26): a long label leaves the select's column narrow, so the hint goes
+      // on one line under the label instead of wrapping under the select.
+      return el("div", { class: "sel" + (s.hintBelowLabel ? " below" : "") }, [el("label", { for: sel.id, text: s.label }), sel, el("small", { text: s.hint || "" })]);
     }
     const box = el("input", { type: "checkbox", id: "opt-" + s.key });
     box.addEventListener("change", () => {
@@ -163,22 +165,32 @@
   // switches; only its visibility follows the check.
   let templeGate = "pending";
   let templeSec = null;
+  let templeRows = []; // rows of other groups that belong to a Temple feature (SCHEMA `withTemple`)
   const applyTempleGate = () => {
     if (templeSec) templeSec.hidden = templeGate !== "show";
+    for (const r of templeRows) r.hidden = templeGate !== "show";
   };
 
   function render() {
     const main = $("groups");
     main.textContent = "";
+    templeRows = [];
     for (const g of S.GROUPS) {
       const entries = S.SCHEMA.filter((s) => s.group === g.id);
       if (!entries.length) continue;
-      const sec = el("section", {}, [el("h2", { text: g.title })]);
+      // A `collapsed` group (Advanced, v1.0.25) is a <details>: its title shows, its body only
+      // after a click. It starts closed every time the page opens — nothing is remembered.
+      const sec = el("section");
+      const body = g.collapsed ? sec.appendChild(el("details", {}, [el("summary", { text: g.title, title: "Click to show or hide" })])) : sec;
+      if (!g.collapsed) sec.appendChild(el("h2", { text: g.title }));
       if (g.id === "temple") templeSec = sec;
-      if (g.intro) sec.appendChild(el("p", { class: "intro", text: g.intro }));
+      if (g.intro) body.appendChild(el("p", { class: "intro", text: g.intro }));
       const grid = el("div", { class: "grid" + (g.columns === 2 ? " cols2" : "") });
-      for (const s of entries) grid.appendChild(optionRow(s));
-      sec.appendChild(grid);
+      for (const s of entries) {
+        const row = grid.appendChild(optionRow(s));
+        if (s.withTemple) templeRows.push(row);
+      }
+      body.appendChild(grid);
       main.appendChild(sec);
     }
     applyTempleGate();

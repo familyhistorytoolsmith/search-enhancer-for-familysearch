@@ -319,6 +319,81 @@ for the Quality Score — no request of its own. The row is always shown:
 
 Hover the row for the current state. It has its own switch on the settings page (Temple menu).
 
+### Temple reservations that are about to expire (off by default)
+
+FamilySearch has no "extend" for a temple reservation: its own advice for one that is about to
+expire is to unreserve the ordinances and reserve them again, which takes a dozen clicks over two
+pages per relative. Switch **Extend reservations** on in the settings (Temple menu group) and
+**Temple › My Reservations** gains, under each row's "Expires:" line, the days left. Inside the
+window you chose (14 days by default) it is a coloured chip (red at three days or less) followed
+by an **↻ Extend** link; outside the window it is plain grey text and **no extension is
+offered** — extending a reservation that still has months to run makes no sense, and could even
+shorten it. Reservations are extended one relative at a time; there is no button for all of them.
+
+The link opens a dialog for that relative, with a tick box. The relative starts unticked, with
+the reason, only when something really stands in the way: FamilySearch's data
+names a reason the ordinances may not be requestable again, or possible duplicates (such a
+relative cannot be ticked at all — see below). A printed family name card, a 120-day reservation
+and a birth within the last 110 years are mentioned as plain notes and hold nothing back: after
+an extension the same card can still be used, a reservation may be extended as often as needed,
+and a relative reserved with a close relative's permission is extended like any other. Should
+FamilySearch show its 110-year permission form again when the ordinances are requested, the run
+**waits** — it presses nothing in that form — until you have answered it, and then carries on;
+the banner says what it is waiting for. If the button of our dialog is pressed with nothing
+ticked, the dialog stays open and says so.
+
+**A row's ↻ Extend link does the work, after asking you.** On that relative's Ordinances tab it
+
+1. presses FamilySearch's own **Unreserve** button and, in the dialog, leaves ticked exactly the
+   ordinances the list showed as reserved by you, then presses FamilySearch's Unreserve;
+2. presses FamilySearch's own **Request** button and, in that dialog, ticks the ordinances it has
+   just unreserved and **unticks every other one** — FamilySearch offers everything that can be
+   requested, already ticked, and an extension of a reservation must not reserve anything new —
+   then presses FamilySearch's Request;
+3. returns to My Reservations and reports the new expiry date in one line — and checks that
+   every ordinance that was reserved before shows as reserved again; anything missing is called
+   out in red.
+
+FamilySearch sometimes handles two ordinances as one unit (its Unreserve dialog has a single tick
+box for Initiatory and Endowment together). The run reads every ordinance a tick box stands for,
+requests each of them again, and presses nothing when the dialog lists an ordinance it cannot
+account for. How long the new reservation runs is FamilySearch's to decide: one extended before
+it ran out got two years; one whose first reservation the temple already held got 120 days.
+
+**Possible duplicates are checked first.** FamilySearch refuses a request while a person involved
+has unresolved possible duplicates — for a sealing to parents either parent, for a sealing to
+spouse the spouse — and an ordinance unreserved in that state stays unreserved until the
+duplicates are resolved. So:
+
+- a relative whose page data says the request would be refused is marked in our
+  dialog and **cannot be ticked** — resolve the duplicates first;
+- on the Ordinances tab the run reads that page's own data again and then opens FamilySearch's
+  Request dialog, both *before* it unreserves anything, and stops with nothing changed if either
+  says the request would be refused, or if the dialog shows its "Possible Duplicates" mark under
+  an ordinance of the run.
+
+These checks do not catch every case: the page's data has been seen to say "no duplicates" where
+FamilySearch's dialog said otherwise.
+
+Should FamilySearch refuse all the same, the run stops at once with FamilySearch's own sentence
+and leaves its dialog open (it has a **View Duplicates** link); the ordinances are then unreserved
+until you have resolved the duplicates and pressed Request yourself.
+
+Between the two presses the ordinances are, in FamilySearch's words, "made available to others".
+If anything is not as expected the run stops and a red banner says exactly where things stand —
+"nothing was changed", or "*SP is NOT RESERVED … Press Request on this page to reserve again*" with
+FamilySearch's own reason when it gives one (possible duplicates, a permission form). **Stop**
+ends the run at once before Unreserve has been pressed; after that the relative is finished
+first. Keep the tab in front while it runs. The **Copy the findings** button on the closing
+banner puts every step of the run on the clipboard.
+
+With **Extend reservations: rehearse only** switched on (settings → Advanced), the link changes nothing: the Ordinances tab
+is opened, both dialogs are opened, described and closed with Cancel.
+
+Everything is done with FamilySearch's own buttons in the tab you are looking at; the extension
+sends no request of its own. The steps of a run are kept in that tab only (`sessionStorage`) and are gone
+when the tab closes — nothing about reservations is saved by the extension.
+
 ### The Labs person page
 
 FamilySearch's optional new person page (the Labs experiment with the "Opt-Out of Experiment"
@@ -359,9 +434,11 @@ in a new tab; that page says which version it describes.
 | **Map pins** | Person page · Sources tab · Source Linker | No 📍 links on that kind of page; any already shown disappear within a second. |
 | **Quality Score** | the tooltip | Hovering the badge shows only what FamilySearch shows. |
 | **Temple menu** | Temple Opportunities · Family Ordinance Opportunities · Remaining Temple Ordinances · Families with Remaining Ordinances | That link is not added (for the last one, no banner on its page either) — handy should FamilySearch start offering one of these tools itself. The whole group is left out of the settings page when an open, signed-in FamilySearch tab shows no Temple menu (see below). |
+| | Extend reservations (**off** unless you switch it on) · the window in which an extension is offered (7 to 90 days, 14 by default) | On: the days left on every row, and — for reservations expiring inside the window — the Extend link on My Reservations (see above). Off: nothing is added there. |
 | **Regional sites** | *Ancestry* — ancestry.com (default), ancestry.co.uk, .ca, .com.au, .de, .fr, .it, .se, .mx, or the library / FamilySearch Center editions; *FindMyPast* — findmypast.com (default), .co.uk, .ie, .com.au | Every Ancestry or Findmypast link **this extension builds** (the Newspapers menu's Findmypast entries included) opens on the chosen site — pick the one your subscription is on. The search grammar is the same on every regional site. FamilySearch's own *All Collections* entry still opens wherever FamilySearch sends it, and the *Ancestry Institution* menu always uses ancestryinstitution.com. |
-| **Advanced** | Console diagnostics | On: the extension's `[FSSE]` messages appear in the DevTools console (filter by `FSSE`) — turn it on to paste the lines into a bug report, off again afterwards. |
+| **Advanced** (collapsed — click the title to show it) | Console diagnostics | On: the extension's `[FSSE]` messages appear in the DevTools console (filter by `FSSE`) — turn it on to paste the lines into a bug report, off again afterwards. |
 | | Simulate a FamilySearch Center | Off by default; for testing. On: stand-ins for the two rows FamilySearch lists only on a FamilySearch Center's network are added to Search Records, so the *Ancestry Institution ▸* and *MyHeritage Library Edition ▸* menus can be looked at anywhere. The stand-ins are copies of FamilySearch's own *Ancestry* / *MyHeritage* rows under the other name — the markup a center shows. Their searches open the institution sites, which let you in only at a center; the first entry (*All Collections*) opens the extension's own search there, since no FamilySearch link stands behind a stand-in. |
+| | Extend reservations: rehearse only | Off by default; for testing. On: the Extend link on My Reservations only opens FamilySearch's two dialogs and cancels them — nothing is changed. Left out of the page together with the Temple menu group. |
 
 **The Temple menu group appears only where it applies.** FamilySearch shows the Temple menu to
 church members only, so for everyone else those four switches mean nothing. Each time the
@@ -551,7 +628,7 @@ Reload the extension and refresh the page.
   (`chrome.storage.sync`, so they follow your Chrome profile), the attached-source titles per
   person whose Sources tab you have viewed (at most 200 people, the oldest dropped first) and an
   optional Google map key (`chrome.storage.local`), the list of FamilySearch Labs experiments that are on for your account as the page last reported it (`chrome.storage.local` — for the Temple menu's Labs row), and a per-session cache of located places
-  (`sessionStorage`). Nothing leaves the browser except the three click-driven requests named at
+  and, while a reservation run is under way, its steps (`sessionStorage` — gone with the tab). Nothing leaves the browser except the three click-driven requests named at
   the top of this file.
 - Attached-source marks exist only for people whose Sources tab you have opened at least once
   (FamilySearch lists the sources nowhere else), and they are title matches — see above.

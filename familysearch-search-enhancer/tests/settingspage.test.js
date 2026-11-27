@@ -80,7 +80,8 @@ async function openPage(tabs, tabOpts, noTabsApi) {
   const S = require(path.join(SRC, "settings.js"));
   require(path.join(SRC, "options.js"));
   await S.ready;
-  const sections = () => doc.byId.groups.children.map((sec) => ({ title: sec.children[0].textContent, hidden: sec.hidden, sec }));
+  // a collapsed group (Advanced) is section > details > summary; the others section > h2
+  const sections = () => doc.byId.groups.children.map((sec) => ({ title: (sec.children[0].tagName === "DETAILS" ? sec.children[0].children[0] : sec.children[0]).textContent, hidden: sec.hidden, sec }));
   return { doc, sections, tabsApi, S };
 }
 const temple = (page) => page.sections().find((s) => s.title === "Temple menu");
@@ -132,7 +133,26 @@ const others = (page) => page.sections().filter((s) => s.title !== "Temple menu"
     others(page).length === 7 && others(page).every((s) => !s.hidden) && page.sections().map((s) => s.title).join("|") === "Search Records menus|Extra menus|FamilySearch Center menus|Map pins 📍|Quality Score|Temple menu|Regional sites|Advanced",
     page.sections().map((s) => s.title).join("|"));
   check("page: nothing takes the group's place (no note, no link) and its switches stay in the page for Restore defaults",
-    page.doc.byId.groups.children.length === 8 && temple(page).sec.children.length === 3 && temple(page).sec.children[2].children.length === 4);
+    // v1.0.8 / v1.0.27: the four links + the "extend reservations" switch and the window select ("rehearse only" moved to Advanced)
+    page.doc.byId.groups.children.length === 8 && temple(page).sec.children.length === 3 && temple(page).sec.children[2].children.length === 6);
+  const advRows = (p) => { const d = p.sections().find((s) => s.title === "Advanced").sec.children[0]; return d.children[d.children.length - 1].children; };
+  check("page, v1.0.27: the rehearsal switch is the last Advanced row and is left out together with the Temple group; the other Advanced rows stay",
+    advRows(page).length === 3 && /rehearse only/.test(advRows(page)[2].textContent) && advRows(page)[2].hidden === true && advRows(page)[0].hidden === false && advRows(page)[1].hidden === false &&
+    /label\.opt\[hidden\] \{ display: none; \}/.test(fs.readFileSync(path.join(SRC, "options.html"), "utf8")));
+  // v1.0.25 (Kevin, 2026-11-26): Advanced is collapsed — a title, the body only on request — and
+  // Restore defaults sits in the footer, after it, whatever the state.
+  const adv = page.sections().find((s) => s.title === "Advanced").sec;
+  const html = fs.readFileSync(path.join(SRC, "options.html"), "utf8");
+  check("page: the Advanced group is a closed <details> — its title a <summary>, its switches inside, never opened by the page itself",
+    adv.children.length === 1 && adv.children[0].tagName === "DETAILS" && adv.children[0].children[0].tagName === "SUMMARY" && adv.children[0].children[0].textContent === "Advanced" &&
+    adv.children[0].getAttribute("open") === null && adv.children[0].children[adv.children[0].children.length - 1].children.length === page.S.SCHEMA.filter((s) => s.group === "advanced").length &&
+    page.S.GROUPS.filter((g) => g.collapsed).map((g) => g.id).join() === "advanced" && page.sections().filter((s) => s.sec.children[0].tagName === "DETAILS").length === 1);
+  check("page: Restore defaults is in the footer, after the groups — shown whether Advanced is open or not", html.indexOf('<main id="groups">') < html.indexOf("<footer>") && html.indexOf("<footer>") < html.indexOf('id="reset"') && html.indexOf('id="reset"') < html.indexOf("</footer>"));
+  // v1.0.26 (Kevin): the window select's hint sits under its long label, not wrapped under the select
+  const selRows = temple(page).sec.children[2].children.filter((n) => /\bsel\b/.test(n.className));
+  check("page: the extension-window select puts its hint below the label (class \"sel below\"); the Regional selects keep theirs under the select",
+    selRows.length === 1 && selRows[0].className === "sel below" && /\.sel\.below small \{ grid-column: 1 \/ -1; \}/.test(html) &&
+    page.sections().find((s) => s.title === "Regional sites").sec.children[2].children.every((n) => n.className === "sel"));
   check("page: the version shows; the storage warning stays hidden", page.doc.byId.ver.textContent === "v9.9.9" && page.doc.byId.nostore.hidden === true);
 
   // v1.0.7: the title and the Help link open the help page
@@ -148,7 +168,7 @@ const others = (page) => page.sections().filter((s) => s.title !== "Temple menu"
 
   page = await openPage([T({ temple: true })]);
   await wait(20);
-  check("page: a member's tab → the Temple group is shown", temple(page).hidden === false && others(page).every((s) => !s.hidden));
+  check("page: a member's tab → the Temple group is shown, and with it the rehearsal switch in Advanced", temple(page).hidden === false && others(page).every((s) => !s.hidden) && advRows(page)[2].hidden === false);
   page = await openPage([T("none"), T("none")]);
   await wait(20);
   check("page: no FamilySearch tab open → the Temple group is shown (as before 1.0.5)", temple(page).hidden === false);

@@ -59,6 +59,8 @@
     { value: "findmypast.com.au", label: "findmypast.com.au (Australia)" },
   ];
 
+  const EXTEND_DAYS = ["7", "14", "21", "30", "60", "90"].map((d) => ({ value: d, label: d + " days" }));
+
   // The options page renders GROUPS in this order; every SCHEMA entry names one. Regional sites
   // sits last before Advanced (Kevin, 2026-10-30).
   const GROUPS = [
@@ -68,9 +70,10 @@
     { id: "center", title: "FamilySearch Center menus", intro: "FamilySearch lists these two rows only on a FamilySearch Center's network, where they open without an account of your own. Each menu stands in for that row; untick one to get the standard row back.", columns: 2 },
     { id: "pins", title: "Map pins 📍", intro: "A small \"📍 map\" link after each place; a click locates it and opens Google Maps in one reused tab." },
     { id: "dqs", title: "Quality Score" },
-    { id: "temple", title: "Temple menu", intro: "For signed-in church members: four links after \"Ordinances Ready\" in the Temple menu (the fourth is a FamilySearch Labs experiment). Untick any FamilySearch starts offering itself." },
+    { id: "temple", title: "Temple menu", intro: "For signed-in church members: four links after \"Ordinances Ready\" in the Temple menu (the fourth is a FamilySearch Labs experiment). Untick any FamilySearch starts offering itself. Below them, an aid for reservations that are about to expire, off until you switch it on." },
     { id: "hosts", title: "Regional sites", intro: "Select your desired regional website subscription:" },
-    { id: "advanced", title: "Advanced" },
+    // v1.0.25 (Kevin, 2026-11-26): `collapsed` — the page shows the title alone; a click opens the body.
+    { id: "advanced", title: "Advanced", collapsed: true },
   ];
 
   // key / group / label / hint / default; `type: "select"` entries carry `choices` (value, label,
@@ -99,9 +102,21 @@
     { key: "site.family-ordinance-opportunities", group: "temple", label: "Family Ordinance Opportunities", hint: "The Blue Fan Chart of available ordinances among your ancestors' descendants.", default: true },
     { key: "site.remaining-ordinances", group: "temple", label: "Remaining Temple Ordinances", hint: "Further ordinances for people on your Completed list.", default: true },
     { key: "site.family-remaining-ordinances", group: "temple", label: "Families with Remaining Ordinances", hint: "A FamilySearch Labs experiment: families on your Completed list whose members still need ordinances. While the experiment is off, the click offers to turn it on (through FamilySearch's own Labs page) before opening it.", default: true },
+    // v1.0.8 — the "extend reservation" aid on Temple › My Reservations (extend.js). OFF by default:
+    // the first feature that changes something on FamilySearch for the user (v1.0.8–9 only rehearsed;
+    // v1.0.10 = the real run for one relative). The window is a select; its values are day counts
+    // as strings.
+    { key: "temple.extend", group: "temple", label: "Extend reservations", hint: "On My Reservations: the days left and, near expiry, an \"Extend\" link. After you confirm, FamilySearch's own Unreserve and Request buttons are pressed for that relative.", default: false },
+    { key: "temple.extendDays", group: "temple", label: "Offer an extension when a reservation expires within", hint: "Outside this window a row shows only the days left.", hintBelowLabel: true, type: "select", default: "14", choices: EXTEND_DAYS },
     { key: "debug", group: "advanced", label: "Console diagnostics", hint: "Write the extension's [FSSE] messages to the DevTools console — for a bug report, filter the console by FSSE and paste the lines.", default: false },
     // v1.0.6 — the two center menus without the drive (Kevin, 2026-11-14); content.js / inject.js simulateCenterRows.
     { key: "test.center", group: "advanced", label: "Simulate a FamilySearch Center", hint: "For testing: adds stand-ins for the two rows FamilySearch lists only on a FamilySearch Center's network, so the Ancestry Institution and MyHeritage Library Edition menus can be looked at anywhere. Their searches open the institution sites, which let you in only at a center.", default: false },
+    // v1.0.10 — off = the row link is the real run. Read strictly (=== false) by extend.js: anything
+    // else rehearses. v1.0.27 (Kevin, 2026-11-26: "largely for testing purpose and feels like it
+    // belongs in the Advanced section"): shown in the Advanced group — the KEY is unchanged, so a
+    // stored value carries over. `withTemple`: the settings page hides the row together with the
+    // Temple group for an account without a Temple menu (the live check, nothing stored).
+    { key: "temple.extendRehearsal", group: "advanced", withTemple: true, label: "Extend reservations: rehearse only", hint: "For testing: the Extend link on My Reservations only opens FamilySearch's two dialogs and cancels them. Nothing is changed.", default: false },
   ];
   const DEFAULTS = {};
   for (const s of SCHEMA) DEFAULTS[s.key] = s.default;
