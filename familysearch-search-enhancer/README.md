@@ -390,6 +390,18 @@ banner puts every step of the run on the clipboard.
 With **Extend reservations: rehearse only** switched on (settings → Advanced), the link changes nothing: the Ordinances tab
 is opened, both dialogs are opened, described and closed with Cancel.
 
+**Showing the feature to someone with nothing about to expire.** With **Extend reservations: demo**
+switched on (settings → Advanced, together with *Extend reservations* itself), the reservation on
+the page that expires soonest, but not inside the window, is shown as if it expired in 5 days: its
+line reads "expires in 5 days (demo)" and carries the Extend link. FamilySearch's own "Expires:"
+date is left as it is, and the tooltip gives it. The link opens the confirmation as a demo; **Start
+the demo** then walks through the steps on that relative's Ordinances tab — FamilySearch's Unreserve
+dialog and, when it is offered, its Request dialog are each opened, left up for about three seconds
+while the banner says what a real run would press there, and closed with Cancel. Nothing is
+unreserved or requested, whatever *rehearse only* is set to. A real relative is used because only a
+real relative has an Ordinances tab; rows that really are inside the window keep their ordinary
+Extend link. Switch the demo off again afterwards.
+
 Everything is done with FamilySearch's own buttons in the tab you are looking at; the extension
 sends no request of its own. The steps of a run are kept in that tab only (`sessionStorage`) and are gone
 when the tab closes — nothing about reservations is saved by the extension.
@@ -439,6 +451,7 @@ in a new tab; that page says which version it describes.
 | **Advanced** (collapsed — click the title to show it) | Console diagnostics | On: the extension's `[FSSE]` messages appear in the DevTools console (filter by `FSSE`) — turn it on to paste the lines into a bug report, off again afterwards. |
 | | Simulate a FamilySearch Center | Off by default; for testing. On: stand-ins for the two rows FamilySearch lists only on a FamilySearch Center's network are added to Search Records, so the *Ancestry Institution ▸* and *MyHeritage Library Edition ▸* menus can be looked at anywhere. The stand-ins are copies of FamilySearch's own *Ancestry* / *MyHeritage* rows under the other name — the markup a center shows. Their searches open the institution sites, which let you in only at a center; the first entry (*All Collections*) opens the extension's own search there, since no FamilySearch link stands behind a stand-in. |
 | | Extend reservations: rehearse only | Off by default; for testing. On: the Extend link on My Reservations only opens FamilySearch's two dialogs and cancels them — nothing is changed. Left out of the page together with the Temple menu group. |
+| | Extend reservations: demo | Off by default; for showing the feature. On (with *Extend reservations* on): the reservation on My Reservations that expires soonest outside the window is shown as if it expired in 5 days, and its Extend link only opens FamilySearch's two dialogs and cancels them — nothing is changed (see above). Left out of the page together with the Temple menu group. |
 
 **The Temple menu group appears only where it applies.** FamilySearch shows the Temple menu to
 church members only, so for everyone else those four switches mean nothing. Each time the

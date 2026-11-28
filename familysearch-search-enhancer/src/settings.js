@@ -117,6 +117,9 @@
     // stored value carries over. `withTemple`: the settings page hides the row together with the
     // Temple group for an account without a Temple menu (the live check, nothing stored).
     { key: "temple.extendRehearsal", group: "advanced", withTemple: true, label: "Extend reservations: rehearse only", hint: "For testing: the Extend link on My Reservations only opens FamilySearch's two dialogs and cancels them. Nothing is changed.", default: false },
+    // v1.0.28 (Kevin, 2026-11-27) — a demo for an account with nothing about to expire: extend.js
+    // shows one real reservation as if it expired in five days; its Extend link only rehearses.
+    { key: "temple.extendDemo", group: "advanced", withTemple: true, label: "Extend reservations: demo", hint: "For showing the feature: on My Reservations, the reservation that expires soonest is shown as if it expired in 5 days. Its Extend link opens FamilySearch's two dialogs and cancels them. Nothing is changed. Needs \"Extend reservations\" switched on.", default: false },
   ];
   const DEFAULTS = {};
   for (const s of SCHEMA) DEFAULTS[s.key] = s.default;

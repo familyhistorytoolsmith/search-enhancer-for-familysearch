@@ -136,8 +136,8 @@ const others = (page) => page.sections().filter((s) => s.title !== "Temple menu"
     // v1.0.8 / v1.0.27: the four links + the "extend reservations" switch and the window select ("rehearse only" moved to Advanced)
     page.doc.byId.groups.children.length === 8 && temple(page).sec.children.length === 3 && temple(page).sec.children[2].children.length === 6);
   const advRows = (p) => { const d = p.sections().find((s) => s.title === "Advanced").sec.children[0]; return d.children[d.children.length - 1].children; };
-  check("page, v1.0.27: the rehearsal switch is the last Advanced row and is left out together with the Temple group; the other Advanced rows stay",
-    advRows(page).length === 3 && /rehearse only/.test(advRows(page)[2].textContent) && advRows(page)[2].hidden === true && advRows(page)[0].hidden === false && advRows(page)[1].hidden === false &&
+  check("page, v1.0.27–28: the rehearsal switch and the demo switch are the last Advanced rows and are left out together with the Temple group; the other Advanced rows stay",
+    advRows(page).length === 4 && /rehearse only/.test(advRows(page)[2].textContent) && advRows(page)[2].hidden === true && /Extend reservations: demo/.test(advRows(page)[3].textContent) && advRows(page)[3].hidden === true && advRows(page)[0].hidden === false && advRows(page)[1].hidden === false &&
     /label\.opt\[hidden\] \{ display: none; \}/.test(fs.readFileSync(path.join(SRC, "options.html"), "utf8")));
   // v1.0.25 (Kevin, 2026-11-26): Advanced is collapsed — a title, the body only on request — and
   // Restore defaults sits in the footer, after it, whatever the state.
@@ -168,7 +168,7 @@ const others = (page) => page.sections().filter((s) => s.title !== "Temple menu"
 
   page = await openPage([T({ temple: true })]);
   await wait(20);
-  check("page: a member's tab → the Temple group is shown, and with it the rehearsal switch in Advanced", temple(page).hidden === false && others(page).every((s) => !s.hidden) && advRows(page)[2].hidden === false);
+  check("page: a member's tab → the Temple group is shown, and with it the rehearsal and demo switches in Advanced", temple(page).hidden === false && others(page).every((s) => !s.hidden) && advRows(page)[2].hidden === false && advRows(page)[3].hidden === false);
   page = await openPage([T("none"), T("none")]);
   await wait(20);
   check("page: no FamilySearch tab open → the Temple group is shown (as before 1.0.5)", temple(page).hidden === false);

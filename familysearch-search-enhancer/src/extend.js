@@ -19,6 +19,17 @@
 //                  sufficient to offer one name at a time. This will also simplify the feature").
 //                  A run is for ONE relative, started by that row's "↻ Extend" link; the job keeps
 //                  its one-entry `queue` so that the engine proven live stays as it was.
+//   v1.0.28      = A DEMO (Kevin, 2026-11-27: "an advanced option that will add a fake temple
+//                  ordinance reservation that is about to expire … to demo the feature for someone
+//                  who does not currently have a soon to expire reservation. Clicking on Extend …
+//                  will effectively walk through the steps but will not actually unreserve and
+//                  reserve the target person"). With the Advanced switch `temple.extendDemo` on, the
+//                  reservation on the page with the soonest expiry date that is NOT inside the window
+//                  is shown as if it expired in DEMO_DAYS days (our own line only — FamilySearch's
+//                  "Expires:" text is never touched). Its Extend link starts a job that is ALWAYS a
+//                  rehearsal (`job.demo`), whatever "rehearse only" says: FamilySearch's two dialogs
+//                  are opened, left up for DEMO_PAUSE_MS so that they can be seen, and cancelled. A
+//                  made-up person was not an option: only a real relative has an Ordinances tab.
 //
 // The text below this line is the step-1 header, kept for the reasoning (its "Extend expiring"
 // button no longer exists — see v1.0.22 above).
@@ -71,6 +82,8 @@
   const SHORT_SPAN_DAYS = 200; // Reserved → Expires under this = a 120-day reservation
   const PERMISSION_YEARS = 110;
   const DEFAULT_WINDOW_DAYS = 14;
+  const DEMO_DAYS = 5; // the demo's pretended days left (inside every window the settings offer)
+  const DEMO_PAUSE_MS = 3000; // a demo leaves each of FamilySearch's dialogs up this long before Cancel
   const ORIGIN = "https://www.familysearch.org";
   const LIST_URL = ORIGIN + "/en/temple/reservations/";
   const RES_PATH_RE = /\/temple\/reservations\/?$/i;
@@ -442,6 +455,21 @@
     const n = s ? parseInt(s.get("temple.extendDays"), 10) : NaN;
     return n > 0 ? n : DEFAULT_WINDOW_DAYS;
   }
+  // v1.0.28 — the demo: on only when the settings say so in as many words.
+  function demoOn() {
+    const s = settingsOf();
+    return !!s && s.get("temple.extendDemo") === true;
+  }
+  // A decorated relative as the demo shows it: the same person and ordinances, a pretended expiry
+  // date DEMO_DAYS away. What is true of the relative stays (a printed card, a note of
+  // FamilySearch's data); "more than 120 days left" is about the date and goes.
+  function demoOf(c, now) {
+    const t = midnight(now || new Date());
+    const d = Object.assign({}, c, { demo: true, realExpires: c.expires, expires: new Date(t.getFullYear(), t.getMonth(), t.getDate() + DEMO_DAYS), days: DEMO_DAYS, inWindow: true });
+    d.flags = Object.assign({}, c.flags, { long: false });
+    d.flagged = !!(d.flags.doubt || d.flags.blocked);
+    return d;
+  }
   const pathNow = () => (typeof location !== "undefined" && location.pathname) || "";
   const isReservationsPage = () => RES_PATH_RE.test(pathNow());
   const ordinancesPid = () => {
@@ -637,7 +665,8 @@
     return rec;
   }
   // Everything known now: the rendered rows (with their elements) and every relative of the list.
-  function model(now) {
+  // `plain` = without the demo's pretended date (what a real run reads the list with).
+  function model(now, plain) {
     const today = now || new Date();
     const win = windowDays();
     const rendered = [];
@@ -655,10 +684,18 @@
       const c = decorate(fromData(r), today, win);
       if (c && c.extendable) byPid.set(pid, c);
     }
+    // The demo's relative: of the rows on the page, the reservation that expires soonest but not
+    // inside the window (one FamilySearch's data would refuse is passed over).
+    const pick = !plain && demoOn() ? rendered.filter((r) => r.c.extendable && !r.c.inWindow && !r.c.flags.blocked).sort((a, b) => a.c.days - b.c.days)[0] : null;
+    if (pick) {
+      pick.c = demoOf(pick.c, today);
+      byPid.set(pick.c.pid, pick.c);
+    }
+    const demoPid = pick ? pick.c.pid : null;
     const expiring = Array.from(byPid.values())
       .filter((c) => c.extendable && c.inWindow)
       .sort((a, b) => a.days - b.days);
-    return { rendered, byPid, expiring, windowDays: win };
+    return { rendered, byPid, expiring, windowDays: win, demoPid };
   }
 
   const CHIP_CSS = "display:inline-block;padding:1px 8px;border-radius:10px;font:600 12px/1.5 system-ui,Arial,sans-serif;margin-right:8px;";
@@ -666,7 +703,7 @@
     if (c.days == null) return { text: "", css: "" };
     if (!c.inWindow) return { text: `${c.days} days left`, css: "font:12px/1.5 system-ui,Arial,sans-serif;color:#667;margin-right:8px;" };
     const red = c.days <= 3;
-    return { text: daysText(c.days), css: CHIP_CSS + (red ? "background:#fde7e9;color:#b3261e;" : "background:#fff4ce;color:#8a5a00;") };
+    return { text: daysText(c.days) + (c.demo ? " (demo)" : ""), css: CHIP_CSS + (red ? "background:#fde7e9;color:#b3261e;" : "background:#fff4ce;color:#8a5a00;") };
   }
   const LINK_CSS = "font:600 12px/1.5 system-ui,Arial,sans-serif;color:#066f90;cursor:pointer;text-decoration:none;white-space:nowrap;";
   function syncRow(r) {
@@ -690,6 +727,7 @@
     if (look.text) {
       const chip = el("span", look.css, look.text);
       if (!offered && c.extendable) chip.title = `Extend is offered within ${win} days of the expiry date (a setting).`;
+      if (c.demo) chip.title = `Demo (an Advanced setting): the real expiry date is ${fmtDate(c.realExpires)}.`;
       wrap.appendChild(chip);
     }
     if (offered) {
@@ -710,6 +748,7 @@
   }
   const ordsText = (c) => c.ords.map((o) => o.letter).join(", ");
   function linkTip(c) {
+    if (c.demo) return `Demo: opens FamilySearch's dialogs and cancels them. Nothing is changed. ${c.name || c.pid}: ${ordsText(c)} — really expires ${fmtDate(c.realExpires)}.`;
     const what = `${c.name || c.pid}: ${ordsText(c)} — expires ${fmtDate(c.expires)}.`;
     return isReal()
       ? `Unreserve and request again with FamilySearch's own buttons. You confirm first. ${what}`
@@ -720,13 +759,14 @@
     let chips = 0;
     for (const r of m.rendered) if (syncRow(r)) chips++;
     const mismatched = m.rendered.filter((r) => {
+      if (r.c.demo) return false; // its date is pretended
       const d = fromData(state.rows.get(r.c.pid));
       return d && d.expires && r.c.expires && daysBetween(d.expires, r.c.expires) !== 0;
     }).length;
     const line =
       `${m.rendered.length} row(s) on the page (${m.rendered.length ? m.rendered[0].via : "none found"}), ${chips} with a days-left line; ` +
       `the page's data: ${state.rows.size} reservation(s)${state.mine ? `, ${state.mine.size} on this list` : ""}; ` +
-      `${m.expiring.length} inside the ${m.windowDays}-day window${m.expiring.length ? ": " + m.expiring.map((c) => `${c.pid} ${c.days}d [${ordsText(c)}]`).join(", ") : ""}` +
+      `${m.expiring.length} inside the ${m.windowDays}-day window${m.expiring.length ? ": " + m.expiring.map((c) => `${c.pid} ${c.days}d [${ordsText(c)}]${c.demo ? " (demo — a pretended date)" : ""}`).join(", ") : ""}` +
       (mismatched ? `; ${mismatched} row(s) where the data's expiry date differs from the page's` : "");
     if (line !== state.lastLine) {
       state.lastLine = line;
@@ -755,13 +795,15 @@
     closeDialog();
     // Only a relative whose reservation expires inside the window — whatever asked for the dialog.
     if (!c || !c.extendable || !c.inWindow) return null;
-    const real = isReal();
+    // The demo's relative is always walked through as a rehearsal, whatever the settings say.
+    const demo = c.demo === true;
+    const real = !demo && isReal();
     const veil = el("div", "position:fixed;inset:0;z-index:2147483646;background:rgba(0,0,0,.45);display:flex;align-items:center;justify-content:center;");
     veil.setAttribute(ATTR, "dialog");
     const box = el("div", "background:#fff;color:#222;max-width:640px;width:calc(100% - 48px);max-height:86vh;overflow:auto;border-radius:8px;padding:20px 24px;box-shadow:0 8px 30px rgba(0,0,0,.35);font:14px/1.45 system-ui,Arial,sans-serif;");
     box.setAttribute("role", "dialog");
     box.setAttribute("aria-modal", "true");
-    box.appendChild(el("h2", "margin:0 0 8px;font:600 18px/1.3 system-ui,Arial,sans-serif;", real ? "Extend this reservation" : "Extend this reservation — rehearsal"));
+    box.appendChild(el("h2", "margin:0 0 8px;font:600 18px/1.3 system-ui,Arial,sans-serif;", real ? "Extend this reservation" : demo ? "Extend this reservation — demo" : "Extend this reservation — rehearsal"));
     const para = (text) => box.appendChild(el("p", "margin:0 0 12px;", text));
     // v1.0.24 (Kevin, 2026-11-26: "too verbose … simplified to just a few lines, perhaps 4 or so"):
     // one short paragraph — what is pressed, what to do meanwhile, the one risk.
@@ -770,6 +812,11 @@
         "This presses FamilySearch's own Unreserve and Request buttons on this relative's Ordinances tab, for the ordinances below only. " +
           "Keep this tab in front until it returns here with the new expiry date. " +
           "If FamilySearch refuses the request (possible duplicates, for example), the ordinances stay unreserved until you press Request yourself."
+      );
+    } else if (demo) {
+      para(
+        `Demo: this reservation really expires on ${fmtDate(c.realExpires)}. ` +
+          "The demo opens FamilySearch's Unreserve and Request dialogs on this relative's Ordinances tab, shows each for a moment and cancels it. Nothing is changed."
       );
     } else {
       para("Rehearsal: opens FamilySearch's Unreserve and Request dialogs on this relative's Ordinances tab, then cancels them. Nothing is changed.");
@@ -801,7 +848,7 @@
     const foot = el("div", "display:flex;gap:10px;justify-content:flex-end;margin-top:16px;");
     const cancel = el("button", "padding:7px 14px;border:1px solid #9aa3ab;border-radius:4px;background:#fff;color:#222;font:inherit;cursor:pointer;", "Cancel");
     cancel.type = "button";
-    const go = el("button", "padding:7px 14px;border:1px solid #066f90;border-radius:4px;background:#066f90;color:#fff;font:inherit;font-weight:600;cursor:pointer;", real ? "Unreserve and request again" : "Rehearse");
+    const go = el("button", "padding:7px 14px;border:1px solid #066f90;border-radius:4px;background:#066f90;color:#fff;font:inherit;font-weight:600;cursor:pointer;", real ? "Unreserve and request again" : demo ? "Start the demo" : "Rehearse");
     go.type = "button";
     go.setAttribute(ATTR + "-go", "1");
     cancel.addEventListener("click", closeDialog);
@@ -829,7 +876,7 @@
     box.appendChild(foot);
     veil.appendChild(box);
     (document.body || document.documentElement).appendChild(veil);
-    log(`dialog (${real ? "the real run" : "a rehearsal"}) for ${c.pid} [${ordsText(c)}]${c.flagged ? " flagged" : ""}`);
+    log(`dialog (${real ? "the real run" : demo ? "the demo" : "a rehearsal"}) for ${c.pid} [${ordsText(c)}]${c.flagged ? " flagged" : ""}`);
     return veil;
   }
 
@@ -882,6 +929,13 @@
   // the shape the engine was proven with, kept as it was.
   function newJob(c, now, real) {
     const t = now || Date.now();
+    // The demo's relative: never the real run, and the job says so (`demo`).
+    if (c.demo) {
+      const j = newJob(Object.assign({}, c, { demo: false }), t, false);
+      j.demo = true;
+      j.queue[0].realExpires = fmtDate(c.realExpires);
+      return j;
+    }
     return {
       v: 1,
       rehearsal: real !== true,
@@ -899,7 +953,7 @@
   function startJob(c, real) {
     const j = newJob(c, null, real);
     state.lastJob = null;
-    note(`${j.rehearsal ? "rehearsal" : "run"} started for ${j.queue.map((q) => `${q.pid} "${q.name}" [${q.ords.join(", ")}]`).join(", ")}`);
+    note(`${j.demo ? "demo" : j.rehearsal ? "rehearsal" : "run"} started for ${j.queue.map((q) => `${q.pid} "${q.name}" [${q.ords.join(", ")}]`).join(", ")}`);
     // How the list page renders the relative — the texts of the row, in order.
     try {
       const row = findRows().find((r) => r.pid === j.queue[0].pid);
@@ -917,7 +971,7 @@
   function findingsText(job) {
     const version = typeof FSSE.version === "function" ? FSSE.version() : "?";
     const lines = [
-      `Search Enhancer for FamilySearch v${version} — extend-reservation ${job.rehearsal ? "rehearsal" : "run"} findings`,
+      `Search Enhancer for FamilySearch v${version} — extend-reservation ${job.demo ? "demo" : job.rehearsal ? "rehearsal" : "run"} findings`,
       job.failed ? `STOPPED: ${job.failed}` : summaryText(job),
       `the page's own data now: ${state.rows.size} row(s), ${state.mine ? state.mine.size : "no"} id(s) on the list`,
       `first data row: ${state.shape || "(none received)"}`,
@@ -1155,6 +1209,7 @@
         return { type: "wait" };
       case "unreserve-look":
         if (!snap.unreserveForm) return { type: "goto", phase: "request-open", result: { unreserve: "dialog found" } };
+        if (job.demo && !job.clicked && waited < DEMO_PAUSE_MS) return { type: "wait" }; // let it be seen
         if (!job.clicked) return { type: "click", target: "unreserveCancel" };
         if (waited > STEP_TIMEOUT_MS) return { type: "fail", reason: "FamilySearch's Unreserve dialog did not close after Cancel — close it yourself; nothing was unreserved" };
         return { type: "wait" };
@@ -1172,6 +1227,7 @@
         return { type: "wait" };
       case "request-look":
         if (!snap.reserveForm) return { type: "goto", phase: "next", result: { request: "dialog found" } };
+        if (job.demo && !job.clicked && waited < DEMO_PAUSE_MS) return { type: "wait" };
         if (!job.clicked) return { type: "click", target: "reserveCancel" };
         if (waited > STEP_TIMEOUT_MS) return { type: "fail", reason: "FamilySearch's Request dialog did not close after Cancel — close it yourself; nothing was requested" };
         return { type: "wait" };
@@ -1333,7 +1389,7 @@
     if (snap.onList) {
       snap.expiry = {};
       snap.reservedNow = {}; // per relative: the ordinances the list shows as reserved now
-      const m = model();
+      const m = model(null, true); // the true dates — never the demo's pretended one
       for (const q of job.queue) {
         const c = m.byPid.get(q.pid);
         if (c && c.expires) snap.expiry[q.pid] = fmtDate(c.expires);
@@ -1460,13 +1516,22 @@
     "request-check": "waiting for FamilySearch's confirmation",
     return: "back to My Reservations for the new expiry date",
   };
+  // What the demo says while one of FamilySearch's dialogs is up: where a real run would press.
+  const DEMO_PHASE_TEXT = {
+    "unreserve-look": "the Unreserve dialog — a real run presses Unreserve here; the demo cancels",
+    "request-look": "the Request dialog — a real run requests the same ordinances here; the demo cancels",
+  };
   function progressText(job) {
     const cur = job.queue[Math.min(job.i, job.queue.length - 1)];
-    const what = (!job.rehearsal && REAL_PHASE_TEXT[job.phase]) || PHASE_TEXT[job.phase] || job.phase;
+    const what = (!job.rehearsal && REAL_PHASE_TEXT[job.phase]) || (job.demo && DEMO_PHASE_TEXT[job.phase]) || PHASE_TEXT[job.phase] || job.phase;
     const tail = job.rehearsal ? " Nothing is changed." : job.stopAsked ? " Stopping once this is reserved again." : " Keep this tab in front.";
-    return `${job.rehearsal ? "rehearsal" : "extending"} — ${cur ? cur.name : ""}: ${what}.${tail}`;
+    return `${job.demo ? "demo" : job.rehearsal ? "rehearsal" : "extending"} — ${cur ? cur.name : ""}: ${what}.${tail}`;
   }
   function summaryText(job) {
+    if (job.demo) {
+      const q = job.queue[0];
+      return `demo finished, nothing was changed — ${q ? q.name : ""}: a real run ends here with the new expiry date.`;
+    }
     if (!job.rehearsal) {
       const q = job.queue[0];
       const r = job.results[0] || {};
@@ -1725,7 +1790,7 @@
     parseDate, daysBetween, fmtDate, daysText, parseRowTexts, fromPage, fromData, merge, flagsOf, decorate, flagTexts,
     isReservationsPage, ordinancesPid, ordUrl, receive, findRows, model, syncList, openDialog, closeDialog, removeAll,
     newJob, loadJob, saveJob, clearJob, startJob, nextAction, advance, snapshot, step, findUnreserveOpener, describeForm, inventory,
-    progressText, summaryText, findingsText, copyFindings, readRow, tick, enabled, windowDays, _state: state, _unnamed: unnamed, _note: note,
+    progressText, summaryText, findingsText, copyFindings, readRow, tick, enabled, windowDays, demoOn, demoOf, DEMO_DAYS, DEMO_PAUSE_MS, _state: state, _unnamed: unnamed, _note: note,
   };
   if (typeof module !== "undefined" && module.exports) module.exports = FSSE.extend;
 })();

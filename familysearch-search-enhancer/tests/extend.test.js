@@ -1007,6 +1007,104 @@ const dataOrd = (type, o) => Object.assign({ type, status: "Reserved", canUnrese
   values["temple.extendRehearsal"] = true;
   check("with \"Rehearse only\" switched on the row link rehearses again", E.isReal() === false);
 
+  // =======================================================================================
+  // v1.0.28 — the demo (Advanced: "Extend reservations: demo"). Kevin, 2026-11-27: "a fake temple
+  // ordinance reservation that is about to expire … Clicking on Extend … will effectively walk
+  // through the steps but will not actually unreserve and reserve the target person."
+  // =======================================================================================
+  {
+    E.clearJob();
+    E.receive([], []);
+    loc.pathname = "/en/temple/reservations/";
+    loc.assigned.length = 0;
+    values["temple.extendDays"] = "14";
+    values["temple.extendRehearsal"] = false; // the REAL run is on — the demo must still change nothing
+    buildList();
+    let dm = E.syncList();
+    const fsExpires = (pid) => body.querySelectorAll(`[data-testid="table-row-${pid}"]`)[0].querySelectorAll("p")[1].textContent;
+    check("demo off (the default): nothing is pretended — Samuel Roberts, 38 days away, has no link", E.demoOn() === false && dm.demoPid === null && lineOf("L7M5-WLQ").children.length === 1 && lineOf("L7M5-WLQ").children[0].textContent === "38 days left");
+    values["temple.extendDemo"] = true;
+    dm = E.syncList();
+    const chip = lineOf("L7M5-WLQ").children[0];
+    check("demo on: the reservation that expires soonest OUTSIDE the window is shown as expiring in 5 days, marked as a demo, with an Extend link",
+      E.demoOn() === true && dm.demoPid === "L7M5-WLQ" && chip.textContent === "expires in 5 days (demo)" && /background/.test(chip.style.cssText) && lineOf("L7M5-WLQ").children[1].textContent === "↻ Extend", chip.textContent);
+    check("…its tooltips give the real date and say nothing is changed; FamilySearch's own \"Expires:\" text is not touched",
+      chip.title === `Demo (an Advanced setting): the real expiry date is ${inDays(38)}.` && /^Demo: opens FamilySearch's dialogs and cancels them\. Nothing is changed\./.test(lineOf("L7M5-WLQ").children[1].title.replace(/\s+/g, " ")) &&
+      fsExpires("L7M5-WLQ") === "Expires: " + inDays(38), lineOf("L7M5-WLQ").children[1].title);
+    check("…one relative only: the really expiring rows and the far-off one are as before",
+      lineOf("G7W9-WCV").children[0].textContent === "expires in 5 days" && lineOf("GDW3-13W").children.length === 1 && lineOf("GDW3-13W").children[0].textContent === "175 days left" && ours("row").filter((n) => /\(demo\)/.test(n.textContent)).length === 1);
+    const dc = dm.byPid.get("L7M5-WLQ");
+    check("the demo's relative: the same person and ordinances, a pretended date, the real one kept, never \"too long left\"",
+      dc.demo === true && dc.days === E.DEMO_DAYS && dc.inWindow === true && E.fmtDate(dc.expires) === inDays(5) && E.fmtDate(dc.realExpires) === inDays(38) && dc.flags.long === false && dc.flagged === false && dc.ords.map((o) => o.letter).join() === "I,E" &&
+      dm.byPid.get("GDW3-13W").demo === undefined && dm.byPid.get("GDW3-13W").flags.long === true);
+    values["temple.extendDays"] = "90";
+    check("the pick follows the window: with 90 days Samuel Roberts is really inside it, so the demo moves to the next one out", E.model().demoPid === "GDW3-13W" && E.model().byPid.get("L7M5-WLQ").demo === undefined);
+    values["temple.extendDays"] = "14";
+    E.syncList();
+    lineOf("L7M5-WLQ").children[1].click();
+    check("its Extend link → our dialog as a demo: the real date, what happens, \"Nothing is changed\", one short paragraph, the box ticked",
+      !!dialog() && /^Extend this reservation — demo/.test(dialog().textContent) && dialog().textContent.includes(`really expires on ${inDays(38)}`) && /cancels it\. Nothing is changed\./.test(dialog().textContent) &&
+      dialog().querySelectorAll("p")[0].textContent.length < 260 && ticks().length === 1 && ticks()[0].checked === true, dialog() && dialog().textContent.slice(0, 300));
+    check("…with \"Start the demo\" — and no button of the real run, although the real run is switched on", E.isReal() === true && !!dialog().querySelectorAll("button").find((b) => b.textContent === "Start the demo") && !dialog().querySelectorAll("button").find((b) => /Unreserve and request again|Rehearse/.test(b.textContent)));
+    press("Start the demo");
+    const dj = E.loadJob();
+    check("Start the demo → a job that is a rehearsal and says it is a demo, for that relative; the tab goes to his Ordinances tab",
+      !dialog() && !!dj && dj.rehearsal === true && dj.demo === true && dj.queue.length === 1 && dj.queue[0].pid === "L7M5-WLQ" && dj.queue[0].expires === inDays(5) && dj.queue[0].realExpires === inDays(38) &&
+      loc.assigned.length === 1 && loc.assigned[0] === ORIGIN + "/en/tree/person/ordinances/L7M5-WLQ", J(dj));
+    // the engine: a demo leaves each dialog up for a moment, then presses Cancel — never a submit
+    const mkD = (phase, extra) => Object.assign(mk(phase, extra), { demo: true });
+    check("engine: the Unreserve dialog stays up for the pause, then CANCEL is pressed; the same for Request",
+      A(mkD("unreserve-look"), snap({ unreserveForm: true })).type === "wait" && A(mkD("unreserve-look"), snap({ unreserveForm: true, now: T0 + E.DEMO_PAUSE_MS + 1 })).target === "unreserveCancel" &&
+      A(mkD("request-look"), snap({ reserveForm: true })).type === "wait" && A(mkD("request-look"), snap({ reserveForm: true, now: T0 + E.DEMO_PAUSE_MS + 1 })).target === "reserveCancel" &&
+      A(mk("unreserve-look"), snap({ unreserveForm: true })).target === "unreserveCancel");
+    check("engine: a demo never presses a submit button and never enters the real run's steps",
+      mkD("open").rehearsal === true && A(mkD("open"), snap()).phase === "unreserve-open" &&
+      ["open", "unreserve-open", "unreserve-look", "request-open", "request-look", "next", "return"].every((p) => [snap(), snap({ now: T0 + 20000, unreserveForm: true, reserveForm: true, unreserveOpener: true, requestButton: { found: true, disabled: false } })].every((s) => !/submit/i.test(J(A(mkD(p), s))))));
+    check("the banner of a demo says where a real run would press",
+      E.progressText(mkD("unreserve-look")) === "demo — A: the Unreserve dialog — a real run presses Unreserve here; the demo cancels. Nothing is changed." &&
+      E.progressText(mkD("request-look")) === "demo — A: the Request dialog — a real run requests the same ordinances here; the demo cancels. Nothing is changed." &&
+      E.progressText(mkD("unreserve-open")) === "demo — A: opening the Unreserve dialog. Nothing is changed.");
+    // one whole demo on a fake Ordinances tab
+    loc.pathname = "/en/tree/person/ordinances/L7M5-WLQ";
+    body.textContent = "";
+    let pressed = 0;
+    let cancelled = 0;
+    const openerD = h("button", "Unreserve", { "data-testid": "unreserve-button" });
+    openerD.addEventListener("click", () => {
+      const form = h("form", "", { "data-testid": "unreserve-form" });
+      const cancel = h("button", "Cancel", { "data-testid": "unreserve-cancel-button" });
+      const submit = h("button", "Unreserve", { "data-testid": "unreserve-submit-button" });
+      cancel.addEventListener("click", () => { cancelled++; form.remove(); });
+      submit.addEventListener("click", () => pressed++);
+      form.add(h("h2", "Unreserve Ordinances"), h("input", "", { type: "checkbox", "data-testid": "L7M5-WLQ_INITIATORY_ENDOWMENT", checked: "" }), cancel, submit);
+      body.add(form);
+    });
+    body.add(openerD);
+    let td = Date.now() + 1000;
+    const stepD = (ms) => (E.step((td += ms || 200)) || {}).type;
+    const seqD = [stepD(), stepD(), stepD(), stepD()];
+    check("on the tab: page read → Unreserve opened → its dialog up, and left up", seqD.join(",") === "goto,click,goto,wait" && body.querySelectorAll('[data-testid="unreserve-form"]').length === 1 && cancelled === 0, seqD.join(","));
+    check("…while the banner says what a real run would do here", /Search Enhancer: demo — Samuel Roberts: the Unreserve dialog — a real run presses Unreserve here; the demo cancels\. Nothing is changed\./.test(ours("banner")[0].textContent), ours("banner")[0].textContent);
+    check("after the pause Cancel is pressed and the dialog is gone", stepD(E.DEMO_PAUSE_MS + 100) === "click" && cancelled === 1 && body.querySelectorAll('[data-testid="unreserve-form"]').length === 0 && pressed === 0);
+    const restD = [stepD(), stepD(), stepD(3100), stepD(), stepD()];
+    check("then Request (not offered while everything is reserved), and back to My Reservations", restD.join(",") === "goto,wait,goto,goto,navigate" && loc.assigned[1] === ORIGIN + "/en/temple/reservations/", restD.join(","));
+    loc.pathname = "/en/temple/reservations/";
+    buildList();
+    const finD = stepD();
+    check("there the demo ends: the job gone, one line that nothing was changed — and FamilySearch's Unreserve was never pressed",
+      finD === "finish" && E.loadJob() === null && /Search Enhancer: demo finished, nothing was changed — Samuel Roberts: a real run ends here with the new expiry date\. $/.test(ours("banner")[0].textContent) && ours("banner")[0].querySelectorAll("button")[0].textContent === "Copy the findings" && pressed === 0, ours("banner")[0] && ours("banner")[0].textContent);
+    check("the findings of a demo say that it was one", /extend-reservation demo findings\ndemo finished, nothing was changed/.test(E.findingsText(E._state.lastJob)) && /demo started for L7M5-WLQ/.test(E.findingsText(E._state.lastJob)));
+    // A real run of another day, with the demo still switched on: the new expiry date it reports is
+    // read off the list as FamilySearch shows it, never the pretended one.
+    const realJob = E.newJob(E.model(null, true).byPid.get("L7M5-WLQ"), null, true);
+    check("a real run reads the list without the demo: the true date, even for the relative the demo has picked",
+      E.model().byPid.get("L7M5-WLQ").demo === true && E.model(null, true).demoPid === null && realJob.rehearsal === false && realJob.demo === undefined && E.snapshot(Date.now(), realJob).expiry["L7M5-WLQ"] === inDays(38));
+    values["temple.extendDemo"] = false;
+    dm = E.syncList();
+    check("demo switched off: the pretended line is gone, the row shows its real days again", dm.demoPid === null && lineOf("L7M5-WLQ").children.length === 1 && lineOf("L7M5-WLQ").children[0].textContent === "38 days left" && E.openDialog(dm.byPid.get("L7M5-WLQ")) === null);
+    values["temple.extendRehearsal"] = true;
+  }
+
   console.log(fails ? `\n${fails} FAILURE(S)` : "\nall extend checks passed");
   process.exit(fails ? 1 : 0);
 })();
