@@ -319,12 +319,12 @@ for the Quality Score — no request of its own. The row is always shown:
 
 Hover the row for the current state. It has its own switch on the settings page (Temple menu).
 
-### Temple reservations that are about to expire (off by default)
+### Temple reservations that are about to expire
 
 FamilySearch has no "extend" for a temple reservation: its own advice for one that is about to
 expire is to unreserve the ordinances and reserve them again, which takes a dozen clicks over two
-pages per relative. Switch **Extend reservations** on in the settings (Temple menu group) and
-**Temple › My Reservations** gains, under each row's "Expires:" line, the days left. Inside the
+pages per relative. With **Extend reservations** on in the settings (Temple menu group; on unless
+you switch it off), **Temple › My Reservations** gains, under each row's "Expires:" line, the days left. Inside the
 window you chose (14 days by default) it is a coloured chip (red at three days or less) followed
 by an **↻ Extend** link; outside the window it is plain grey text and **no extension is
 offered** — extending a reservation that still has months to run makes no sense, and could even
@@ -446,7 +446,7 @@ in a new tab; that page says which version it describes.
 | **Map pins** | Person page · Sources tab · Source Linker | No 📍 links on that kind of page; any already shown disappear within a second. |
 | **Quality Score** | the tooltip | Hovering the badge shows only what FamilySearch shows. |
 | **Temple menu** | Temple Opportunities · Family Ordinance Opportunities · Remaining Temple Ordinances · Families with Remaining Ordinances | That link is not added (for the last one, no banner on its page either) — handy should FamilySearch start offering one of these tools itself. The whole group is left out of the settings page when an open, signed-in FamilySearch tab shows no Temple menu (see below). |
-| | Extend reservations (**off** unless you switch it on) · the window in which an extension is offered (7 to 90 days, 14 by default) | On: the days left on every row, and — for reservations expiring inside the window — the Extend link on My Reservations (see above). Off: nothing is added there. |
+| | Extend reservations (on unless you switch it off) · the window in which an extension is offered (7 to 90 days, 14 by default) | On: the days left on every row, and — for reservations expiring inside the window — the Extend link on My Reservations (see above). Off: nothing is added there. |
 | **Regional sites** | *Ancestry* — ancestry.com (default), ancestry.co.uk, .ca, .com.au, .de, .fr, .it, .se, .mx, or the library / FamilySearch Center editions; *FindMyPast* — findmypast.com (default), .co.uk, .ie, .com.au | Every Ancestry or Findmypast link **this extension builds** (the Newspapers menu's Findmypast entries included) opens on the chosen site — pick the one your subscription is on. The search grammar is the same on every regional site. FamilySearch's own *All Collections* entry still opens wherever FamilySearch sends it, and the *Ancestry Institution* menu always uses ancestryinstitution.com. |
 | **Advanced** (collapsed — click the title to show it) | Console diagnostics | On: the extension's `[FSSE]` messages appear in the DevTools console (filter by `FSSE`) — turn it on to paste the lines into a bug report, off again afterwards. |
 | | Simulate a FamilySearch Center | Off by default; for testing. On: stand-ins for the two rows FamilySearch lists only on a FamilySearch Center's network are added to Search Records, so the *Ancestry Institution ▸* and *MyHeritage Library Edition ▸* menus can be looked at anywhere. The stand-ins are copies of FamilySearch's own *Ancestry* / *MyHeritage* rows under the other name — the markup a center shows. Their searches open the institution sites, which let you in only at a center; the first entry (*All Collections*) opens the extension's own search there, since no FamilySearch link stands behind a stand-in. |

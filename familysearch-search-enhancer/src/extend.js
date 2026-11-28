@@ -50,7 +50,8 @@
 //     page markup is login-walled, so the marker names below are read off FamilySearch's public
 //     bundle (2026-11-26) and unverified until Kevin's first rehearsal.
 //
-// Off by default: the Temple settings group's "Extend reservations" switch (settings.js).
+// The Temple settings group's "Extend reservations" switch (settings.js): on by default since
+// v1.0.30 (off v1.0.8–29).
 //
 // DATA: two sources, merged per relative —
 //   the page (rows found by their `table-row-<PID>` marker, else by the visible "Expires:" text):

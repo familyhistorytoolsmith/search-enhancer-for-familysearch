@@ -67,7 +67,7 @@
     <img src="img/promo-tile-440x280.png" srcset="img/promo-tile-440x280.png 1x, img/promo-tile-880x560.png 2x" width="440" height="280" alt="Search Enhancer for FamilySearch">
   </picture></h1>
   <p class="tagline">A Chrome extension that adds pre-filled record searches and research aids to FamilySearch Family Tree person pages.</p>
-  <p class="version">This page describes <strong>version <span id="ext-version">1.0.7</span></strong>. Your own version is shown at the top of the extension's <a href="#settings">settings page</a>; a copy from the Chrome Web Store can be a version behind for a few days while an update is reviewed.</p>
+  <p class="version">This page describes <strong>version <span id="ext-version">1.0.30</span></strong>. Your own version is shown at the top of the extension's <a href="#settings">settings page</a>; a copy from the Chrome Web Store can be a version behind for a few days while an update is reviewed.</p>
 </header>
 
 <p class="links">
@@ -143,10 +143,14 @@
 <h3>Temple menu links</h3>
 <p>For signed-in members of The Church of Jesus Christ of Latter-day Saints, four links in the <strong>Temple</strong> menu. The fourth opens the FamilySearch Labs experiment <em>Families with Remaining Ordinances</em> and, while that experiment is off, first offers to turn it on through FamilySearch's own Labs page.</p>
 
+<h3 id="extend">Temple reservations that are about to expire</h3>
+<p>Also for signed-in members: on <strong>Temple › My Reservations</strong>, each relative's row shows the days left before the reservation expires. FamilySearch has no way to extend a reservation; its own advice for one that is about to expire is to unreserve the ordinances and request them again, a dozen clicks over two pages. A reservation expiring within 14 days (you can change the window) gets an <strong>↻ Extend</strong> link that does this for you, one relative at a time. After you confirm, it presses FamilySearch's own <strong>Unreserve</strong> and <strong>Request</strong> buttons on that relative's Ordinances tab, for the ordinances you had reserved and nothing new, and returns with the new expiry date.</p>
+<p>Before it unreserves anything, it checks whether FamilySearch would refuse the new request (possible duplicates of a parent or spouse, for example) and stops with nothing changed if so. No check catches every case: should FamilySearch refuse after the unreserve, a red banner says so, and the ordinances stay unreserved until you press Request yourself. Keep the tab in front while it works, about half a minute.</p>
+
 <p>The <a href="feature-guide.pdf">feature guide</a> (an illustrated PDF) walks through every menu with examples; it is written for genealogists, not programmers.</p>
 
 <h2 id="settings">Settings</h2>
-<p>Click the extension's toolbar icon (or open <code>chrome://extensions</code> → <em>Details</em> → <em>Extension options</em>). Every feature has its own switch: each search menu, the map pins per kind of page, the Quality Score tooltip, each Temple link. Switch a menu off and FamilySearch's own row for that site comes back, the thing to do when you have no account with a site and only want its standard search. Two drop-downs point the Ancestry and Findmypast links at your own regional site (ancestry.co.uk, findmypast.com.au and so on). The Temple switches are left out when an open, signed-in FamilySearch tab shows no Temple menu; that is checked each time the page opens and is not stored. Changes apply at once; open FamilySearch tabs follow within a second.</p>
+<p>Click the extension's toolbar icon (or open <code>chrome://extensions</code> → <em>Details</em> → <em>Extension options</em>). Every feature has its own switch: each search menu, the map pins per kind of page, the Quality Score tooltip, each Temple link, the <a href="#extend">Extend reservations</a> aid. Switch a menu off and FamilySearch's own row for that site comes back, the thing to do when you have no account with a site and only want its standard search. Two drop-downs point the Ancestry and Findmypast links at your own regional site (ancestry.co.uk, findmypast.com.au and so on). The Temple switches are left out when an open, signed-in FamilySearch tab shows no Temple menu; that is checked each time the page opens and is not stored. Changes apply at once; open FamilySearch tabs follow within a second.</p>
 
 <h2 id="accounts">Accounts and costs</h2>
 <table>
@@ -154,10 +158,10 @@
   <tr><th>Free account</th><td>GRO (the index), ScotlandsPeople (index results; images cost credits)</td></tr>
   <tr><th>Subscription to view records</th><td>Ancestry, MyHeritage, Findmypast, Newspapers.com, GenealogyBank, RootsIreland (its counts are free)</td></tr>
 </table>
-<p>The searches are suggestions: attaching a record is still your decision on the results page. The extension never changes anything in your tree.</p>
+<p>The searches are suggestions: attaching a record is still your decision on the results page. The extension never changes anything in your tree. The one thing it changes on FamilySearch is a temple reservation you ask it to <a href="#extend">extend</a>.</p>
 
 <h2 id="privacy">Privacy</h2>
-<p>The extension has no server, no account, no analytics and no telemetry. It sends nothing anywhere except on your click: the search you open on the site you chose, the place name sent to OpenStreetMap's geocoder when you click a map link, and Google's embedded map on the map page. It stores your settings and a small per-person cache on your own device, and nothing anywhere else. The <a href="privacy-policy.html">privacy policy</a> lists every item.</p>
+<p>The extension has no server, no account, no analytics and no telemetry. It sends nothing anywhere except on your click: the search you open on the site you chose, the place name sent to OpenStreetMap's geocoder when you click a map link, and Google's embedded map on the map page. Extending a temple reservation sends nothing of its own either: it presses FamilySearch's own buttons, after you confirm. It stores your settings and a small per-person cache on your own device, and nothing anywhere else. The <a href="privacy-policy.html">privacy policy</a> lists every item.</p>
 
 <h2 id="help">Help and feedback</h2>
 <p>Something not working, or a search you would like to see added? Open an issue on <a href="https://github.com/familyhistorytoolsmith/search-enhancer-for-familysearch/issues">GitHub</a> or write to <strong>familyhistorytoolsmith@gmail.com</strong>. For a problem on a particular person page, say which person (a FamilySearch ID is enough, for a deceased person) and what you expected to see. The settings page has a <em>Console diagnostics</em> switch whose output helps with trickier reports.</p>

@@ -25,6 +25,13 @@ their row, and the "Simulate a FamilySearch Center" switch under Advanced). The 
 build since 2026-11-21. The dashboard reads the title, summary, version and icons from the manifest
 inside.
 
+**Next upload (1.0.30 or later — the first build with "Extend reservations", on by default):** three
+texts below changed on 2026-11-28 and must be pasted into the dashboard with that upload — the
+**Description** (one new bullet under RESEARCH AIDS), the **Single purpose description** and the
+**Host permission justification**. The privacy policy and the help page were updated the same day.
+The Data usage answer stays "Website content" only. Before building the zip, check that
+`docs/index.html` names the manifest's version (the build script refuses otherwise).
+
 ---
 
 ## Store listing tab
@@ -74,6 +81,8 @@ RESEARCH AIDS
 
 • For signed-in members of The Church of Jesus Christ of Latter-day Saints, four links in the Temple menu. The fourth opens the Labs experiment "Families with Remaining Ordinances" and, while that experiment is off, offers to turn it on in Labs first.
 
+• Also for members: the Temple reservations list shows the days left on each reservation. One that is about to expire gets an Extend link: after you confirm, it presses the site's own Unreserve and Request buttons for that relative and reports the new expiry date.
+
 Every feature can be switched off on the settings page (click the toolbar icon), and the partner links can be pointed at your own regional edition.
 
 PRIVACY
@@ -113,7 +122,7 @@ as Google's icon guidance asks; the manifest keeps the unpadded icons).
 **Single purpose description:**
 
 ```
-Adds pre-filled genealogy record searches and research aids to FamilySearch Family Tree person pages: extra search entries in the page's own Search Records list (FamilySearch collections, Ancestry, MyHeritage, Findmypast, FreeBMD, GRO, ScotlandsPeople, RootsIreland, IrishGenealogy, newspaper archives), map links for the places the page shows, the number behind the Quality Score badge, and four links in the Temple menu. Everything acts on the FamilySearch page the user is viewing.
+Adds pre-filled genealogy record searches and research aids to FamilySearch Family Tree person pages: extra search entries in the page's own Search Records list (FamilySearch collections, Ancestry, MyHeritage, Findmypast, FreeBMD, GRO, ScotlandsPeople, RootsIreland, IrishGenealogy, newspaper archives), map links for the places the page shows, the number behind the Quality Score badge, four links in the Temple menu and, on the Temple reservations list, the days left on each reservation with a link that extends an expiring one by pressing FamilySearch's own Unreserve and Request buttons after the user confirms. Everything acts on the FamilySearch page the user is viewing.
 ```
 
 **Permission justification — `storage`:**
@@ -125,7 +134,7 @@ Saves the user's settings (which menus and features are on, the regional Ancestr
 **Host permission justification** (the four content-script hosts):
 
 ```
-www.familysearch.org: the extension reads the person page the user is viewing (name, dates, places, family, attached-source titles) and adds its search rows, map links and tooltip there. www.freebmd.org.uk, www.gro.gov.uk, www.scotlandspeople.gov.uk: these sites have no search URLs. When the user clicks one of the extension's search entries, a small script on that site fills the site's own search form with the parameters carried in the URL fragment and presses Search — only for a search the user launched from FamilySearch; it does nothing when the user browses those sites themselves.
+www.familysearch.org: the extension reads the person page the user is viewing (name, dates, places, family, attached-source titles) and adds its search rows, map links and tooltip there; for church members it also adds four links to the Temple menu and, on the Temple reservations list, the days left and an Extend link that presses FamilySearch's own Unreserve and Request buttons for one relative after the user confirms (no request of the extension's own). www.freebmd.org.uk, www.gro.gov.uk, www.scotlandspeople.gov.uk: these sites have no search URLs. When the user clicks one of the extension's search entries, a small script on that site fills the site's own search form with the parameters carried in the URL fragment and presses Search — only for a search the user launched from FamilySearch; it does nothing when the user browses those sites themselves.
 ```
 
 **Are you using remote code?** No. (The map page embeds Google Maps in an iframe; no script is loaded from outside the package.)

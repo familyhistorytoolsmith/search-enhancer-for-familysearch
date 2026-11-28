@@ -31,7 +31,7 @@
 // for the FSSE_LABS_REQUEST ping. Still no request of ours.
 //
 // v1.0.8 — and the page's OWN reads of the temple reservation list (Temple › My Reservations),
-// for src/extend.js (the "extend reservation" aid, off by default):
+// for src/extend.js (the "extend reservation" aid; nothing is posted while its switch is off):
 //   GET /service/tree/tree-data/reservations/list/<user>?sharedWithTemple=false   (the ids)
 //   GET /service/tree/tree-data/reservations/person/<pid,pid,…>?…                 (.rows, 30 ids a call)
 // (paths and field names read off FamilySearch's public temple bundle, 2026-11-26 — the shape is

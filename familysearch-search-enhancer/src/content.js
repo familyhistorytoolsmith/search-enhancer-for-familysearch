@@ -329,8 +329,8 @@
       }
     }
     // v1.0.8: on Temple › My Reservations the days left per reservation and the "extend" aid; on a
-    // relative's Ordinances tab the steps of a run in progress (extend.js; off by default, and a
-    // no-op on every other page).
+    // relative's Ordinances tab the steps of a run in progress (extend.js; its own settings switch, on by
+    // default since v1.0.30, and a no-op on every other page).
     if (FSSE.extend) {
       try {
         FSSE.extend.tick();

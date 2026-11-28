@@ -37,7 +37,7 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 OUT = sys.argv[1] if len(sys.argv) > 1 else os.path.join(HERE, "docs", "feature-guide.pdf")  # served by GitHub Pages
 ICONS = os.path.join(HERE, "familysearch-search-enhancer", "icons")
 PICTURES = os.path.join(HERE, "store")   # the marquee tile and the five store screenshots
-VERSION = "1.0.7"
+VERSION = "1.0.30"
 
 # ---------- fonts ----------
 F = r"C:\Windows\Fonts"
@@ -480,6 +480,21 @@ story += block(heading("Temple menu links (signed-in church members only)"), [
      "list whose other members still need ordinances. While the experiment is off for your account, the click first offers to "
      "turn it on through FamilySearch\u2019s own Labs page; Shift+click opens the Labs page."],
     "Accounts without a Temple menu are unaffected.",
+])
+
+EXT = "<b>" + sym("↻") + " Extend</b>"   # ↻ Extend
+story += block(heading("Temple reservations that are about to expire (signed-in church members only)"), [
+    "On <b>Temple › My Reservations</b> every relative’s row shows the days left before the reservation expires. "
+    "FamilySearch has no “extend”: its own advice for a reservation about to expire is to unreserve the ordinances "
+    "and request them again — a dozen clicks over two pages.",
+    "A reservation expiring within 14 days (the window is a setting) gets an " + EXT + " link, one relative at a time. After "
+    "you confirm, it presses FamilySearch’s own <b>Unreserve</b> and <b>Request</b> buttons on that relative’s Ordinances "
+    "tab — for the ordinances you had reserved, nothing new — and returns with the new expiry date. Keep the tab in "
+    "front while it works, about half a minute.",
+    "Before it unreserves anything it checks whether FamilySearch would refuse the new request (possible duplicates of a "
+    "parent or spouse, for example) and stops with nothing changed. No check catches every case: should FamilySearch refuse "
+    "after the unreserve, a red banner says so, and the ordinances stay unreserved until you press Request yourself.",
+    "It is on unless you switch it off: <i>Extend reservations</i> under <i>Temple menu</i> on the settings page.",
 ])
 
 story += block(heading("Quality Score: the number behind the badge"), [

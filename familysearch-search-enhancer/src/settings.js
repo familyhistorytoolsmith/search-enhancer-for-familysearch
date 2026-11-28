@@ -70,7 +70,7 @@
     { id: "center", title: "FamilySearch Center menus", intro: "FamilySearch lists these two rows only on a FamilySearch Center's network, where they open without an account of your own. Each menu stands in for that row; untick one to get the standard row back.", columns: 2 },
     { id: "pins", title: "Map pins 📍", intro: "A small \"📍 map\" link after each place; a click locates it and opens Google Maps in one reused tab." },
     { id: "dqs", title: "Quality Score" },
-    { id: "temple", title: "Temple menu", intro: "For signed-in church members: four links after \"Ordinances Ready\" in the Temple menu (the fourth is a FamilySearch Labs experiment). Untick any FamilySearch starts offering itself. Below them, an aid for reservations that are about to expire, off until you switch it on." },
+    { id: "temple", title: "Temple menu", intro: "For signed-in church members: four new links are added to the Temple menu after Ordinances Ready. Untick any that are not needed." },
     { id: "hosts", title: "Regional sites", intro: "Select your desired regional website subscription:" },
     // v1.0.25 (Kevin, 2026-11-26): `collapsed` — the page shows the title alone; a click opens the body.
     { id: "advanced", title: "Advanced", collapsed: true },
@@ -99,14 +99,15 @@
     { key: "pins.linker", group: "pins", label: "Source Linker", hint: "\"📍 compare\" between the record's and the tree's places, \"📍 map\" for the rest.", default: true },
     { key: "dqs.tooltip", group: "dqs", label: "Quality Score tooltip", hint: "Hovering the Low / Medium / High badge shows the number behind the word, the thresholds and the steps that would reach High (read from the page's own data).", default: true },
     { key: "site.temple-opportunities", group: "temple", label: "Temple Opportunities", hint: "Ancestors with ordinances ready to reserve, close relatives first.", default: true },
-    { key: "site.family-ordinance-opportunities", group: "temple", label: "Family Ordinance Opportunities", hint: "The Blue Fan Chart of available ordinances among your ancestors' descendants.", default: true },
+    { key: "site.family-ordinance-opportunities", group: "temple", label: "Family Ordinance Opportunities", hint: "Select the available ordinances for the descendants of your ancestors.", default: true },
     { key: "site.remaining-ordinances", group: "temple", label: "Remaining Temple Ordinances", hint: "Further ordinances for people on your Completed list.", default: true },
-    { key: "site.family-remaining-ordinances", group: "temple", label: "Families with Remaining Ordinances", hint: "A FamilySearch Labs experiment: families on your Completed list whose members still need ordinances. While the experiment is off, the click offers to turn it on (through FamilySearch's own Labs page) before opening it.", default: true },
-    // v1.0.8 — the "extend reservation" aid on Temple › My Reservations (extend.js). OFF by default:
-    // the first feature that changes something on FamilySearch for the user (v1.0.8–9 only rehearsed;
-    // v1.0.10 = the real run for one relative). The window is a select; its values are day counts
-    // as strings.
-    { key: "temple.extend", group: "temple", label: "Extend reservations", hint: "On My Reservations: the days left and, near expiry, an \"Extend\" link. After you confirm, FamilySearch's own Unreserve and Request buttons are pressed for that relative.", default: false },
+    { key: "site.family-remaining-ordinances", group: "temple", label: "Families with Remaining Ordinances", hint: "Select families from your completed list whose members are in need of ordinances. This is currently a FamilySearch Labs experiment.", default: true },
+    // v1.0.8 — the "extend reservation" aid on Temple › My Reservations (extend.js): the first
+    // feature that changes something on FamilySearch for the user, and only after the user confirms
+    // it for one relative (v1.0.8–9 only rehearsed; v1.0.10 = the real run). Off by default
+    // v1.0.8–29; ON by default since v1.0.30 (Kevin, 2026-11-28) — a stored "off" stays off. The
+    // window is a select; its values are day counts as strings.
+    { key: "temple.extend", group: "temple", label: "Extend reservations", hint: "Display the number of days left when viewing My Reservations along with an “Extend” link which will un/reserve the selected relative.", default: true },
     { key: "temple.extendDays", group: "temple", label: "Offer an extension when a reservation expires within", hint: "Outside this window a row shows only the days left.", hintBelowLabel: true, type: "select", default: "14", choices: EXTEND_DAYS },
     { key: "debug", group: "advanced", label: "Console diagnostics", hint: "Write the extension's [FSSE] messages to the DevTools console — for a bug report, filter the console by FSSE and paste the lines.", default: false },
     // v1.0.6 — the two center menus without the drive (Kevin, 2026-11-14); content.js / inject.js simulateCenterRows.
